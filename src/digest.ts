@@ -87,16 +87,7 @@ const sourceLinks = (article: Article): string => [
 ].join(" · ");
 
 export const renderDigestBody = (markdown: string, articles: Article[]): string => {
-  const withImages = markdown.replace(
-    /(^## 热点(?:[一二三四五六七八九]|十)[^\S\r\n]*$)([\s\S]*?)(?=^## 热点(?:[一二三四五六七八九]|十)[^\S\r\n]*$|(?![\s\S]))/gm,
-    (section: string, heading: string) => {
-      const citation = section.match(/〔(\d+)〕/);
-      const article = citation ? articles[Number(citation[1]) - 1] : undefined;
-      if (!article?.imageUrl) return section;
-      return section.replace(heading, `${heading}\n\n![${markdownEscape(article.title)}](<${markdownUrl(article.imageUrl)}>)`);
-    },
-  );
-  return withImages.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {
+  return markdown.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {
     const article = articles[Number(rawIndex) - 1];
     return article ? sourceLinks(article) : citation;
   });

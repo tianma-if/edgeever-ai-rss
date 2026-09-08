@@ -41,6 +41,10 @@ describe("category digest", () => {
       article({ id: "undated", publishedAt: null }),
     ], "ai", now);
     expect(result.map((item) => item.id)).toEqual(["article-1"]);
+    expect(recentCategoryArticles([
+      article(),
+      article({ id: "older", publishedAt: "2026-09-07T11:59:59.000Z" }),
+    ], "ai", now, 20, 48).map((item) => item.id)).toEqual(["article-1", "older"]);
   });
 
   test("builds a traceable note with deterministic sources", () => {
@@ -51,9 +55,11 @@ describe("category digest", () => {
       generatedAt: new Date("2026-09-08T12:00:00.000Z"),
       articles: [article()],
       aiMarkdown: "## 今日概览\n\n重要更新〔1〕",
+      windowHours: 48,
     });
     expect(markdown).toContain("# 2026-09-08 · AI 前沿 · RSS 日报");
     expect(markdown).toContain("## 来源");
+    expect(markdown).toContain("最近 48 小时");
     expect(markdown).toContain("[A useful \\[update\\]](<https://example.com/update>)");
   });
 });

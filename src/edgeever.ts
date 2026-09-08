@@ -27,6 +27,8 @@ export interface PluginSchedule {
   runsOnThisDevice: boolean;
 }
 
+export type PluginSettingValue = string | number | boolean;
+
 export interface PluginContext {
   ai: {
     status(): Promise<{ configured: boolean; modelName?: string }>;
@@ -83,6 +85,14 @@ export interface PluginContext {
     }): Promise<PluginSchedule>;
     list(): Promise<PluginSchedule[]>;
     remove(key: string): Promise<void>;
+  };
+  settings: {
+    get(key: string): Promise<PluginSettingValue | null>;
+    set(key: string, value: PluginSettingValue): Promise<void>;
+    remove(key: string): Promise<void>;
+  };
+  events: {
+    on(event: "settings.changed", listener: (payload: { key: string }) => void | Promise<void>): () => void;
   };
   ui: {
     showNotice(message: string): void;

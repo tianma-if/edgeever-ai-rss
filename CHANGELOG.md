@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- 使用 EdgeEver 官方声明式插件设置页统一管理主题、刷新与日报参数，并迁移已有主题选择。
+- 支持按设备时区自定义日报生成整点，保存设置后立即更新桌面计划。
+- Move topics, refresh behavior, and digest parameters into EdgeEver's official declarative plugin settings page, including legacy topic migration.
+- Support a customizable whole-hour digest time in the device timezone with immediate desktop schedule updates.
+
 ## 0.2.0 — 2026-09-08
 
 - 添加按分类生成最近 24 小时日报，并支持同日同分类幂等更新。

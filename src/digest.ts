@@ -28,8 +28,9 @@ export const recentCategoryArticles = (
   categoryId: string,
   now: Date,
   limit = MAX_DIGEST_ARTICLES,
+  windowHours = DAILY_DIGEST_WINDOW_MS / (60 * 60 * 1_000),
 ): Article[] => {
-  const cutoff = now.getTime() - DAILY_DIGEST_WINDOW_MS;
+  const cutoff = now.getTime() - windowHours * 60 * 60 * 1_000;
   return articles
     .filter((article) => {
       if (article.categoryId !== categoryId || !article.publishedAt) return false;
@@ -56,6 +57,7 @@ export const buildDigestMarkdown = (input: {
   generatedAt: Date;
   articles: Article[];
   aiMarkdown: string;
+  windowHours?: number;
 }): string => {
   const generatedAt = input.generatedAt.toISOString();
   const sources = input.articles.map((article, index) => {
@@ -64,7 +66,7 @@ export const buildDigestMarkdown = (input: {
   });
   return [
     `# ${markdownEscape(input.title)}`,
-    `> 分类：${markdownEscape(input.category.name)} · 最近 24 小时 · ${input.articles.length} 篇 · 生成于 ${generatedAt}`,
+    `> 分类：${markdownEscape(input.category.name)} · 最近 ${input.windowHours ?? 24} 小时 · ${input.articles.length} 篇 · 生成于 ${generatedAt}`,
     input.aiMarkdown.trim(),
     "## 来源",
     ...sources,

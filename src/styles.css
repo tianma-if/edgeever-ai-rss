@@ -92,8 +92,7 @@
 .ear-button:disabled { cursor: wait; opacity: 0.55; }
 .ear-button:focus-visible,
 .ear-link:focus-visible,
-.ear-article-card:focus-visible,
-.ear-chip:has(input:focus-visible) { outline: 3px solid color-mix(in srgb, var(--ear-accent) 38%, transparent); outline-offset: 2px; }
+.ear-article-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--ear-accent) 38%, transparent); outline-offset: 2px; }
 
 .ear-controls {
   align-items: flex-end;
@@ -104,34 +103,12 @@
   background: var(--color-surface, #fff);
 }
 
-.ear-categories {
-  display: flex;
-  min-width: max-content;
-  gap: 8px;
+.ear-settings-hint {
   margin: 0;
-  padding: 0;
-  border: 0;
+  color: var(--color-text-muted, #617068);
+  font-size: 13px;
+  line-height: 1.5;
 }
-
-.ear-categories .ear-control-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
-
-.ear-chip {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 160px;
-  border: 1px solid var(--color-border, #dce5df);
-  border-radius: 12px;
-  padding: 8px 10px;
-  background: var(--color-background, #f7faf8);
-  cursor: pointer;
-}
-
-.ear-chip:has(input:checked) { border-color: var(--ear-accent); background: color-mix(in srgb, var(--ear-accent) 9%, var(--color-surface, #fff)); }
-.ear-chip input { margin-top: 3px; accent-color: var(--ear-accent); }
-.ear-chip-copy { display: grid; gap: 2px; }
-.ear-chip-copy strong { font-size: 13px; }
-.ear-chip-copy small { color: var(--color-text-muted, #617068); font-size: 11px; line-height: 1.3; }
 
 .ear-notebook { display: grid; min-width: 180px; gap: 6px; }
 .ear-select { min-height: 38px; border: 1px solid var(--color-border, #cfdad3); border-radius: 9px; padding: 0 10px; color: inherit; background: var(--color-surface, #fff); }
@@ -190,7 +167,6 @@
   .ear-header,
   .ear-controls { flex-direction: column; }
   .ear-controls { align-items: stretch; padding: 12px 18px; }
-  .ear-categories { width: 100%; overflow-x: auto; }
   .ear-status { padding-inline: 18px; }
   .ear-workspace { display: block; }
   .ear-list { width: 100%; max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--color-border, #dce5df); }

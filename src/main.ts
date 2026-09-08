@@ -1,5 +1,4 @@
 import { CATEGORIES, DEFAULT_CATEGORY_IDS, FEEDS } from "./catalog";
-import type { FeedCategory } from "./catalog";
 import type { EdgeEverPlugin, PluginContext, PluginNotebook } from "./edgeever";
 import {
   buildDigestMarkdown,
@@ -12,11 +11,20 @@ import {
 } from "./digest";
 import { fetchFeed } from "./feed";
 import type { Article } from "./feed";
+import {
+  AUTO_DIGEST_KEY,
+  DIGEST_GENERATION_TIME_KEY,
+  digestCronExpression,
+  loadReaderPreferences,
+  migrateLegacyCategorySettings,
+} from "./settings";
 
 const STATE_KEY = "reader-state-v1";
 const MAX_CACHED_ARTICLES = 240;
 const DAILY_DIGEST_COMMAND_ID = "generate-daily-category-digests";
-const DAILY_DIGEST_SCHEDULE_KEY = "daily-category-digests";
+const SCHEDULED_DIGEST_COMMAND_ID = "run-scheduled-daily-category-digests";
+const LEGACY_DAILY_DIGEST_SCHEDULE_KEY = "daily-category-digests";
+const DAILY_DIGEST_SCHEDULE_KEY = "daily-category-digests-v2";
 
 interface AiReading {
   summary?: string;
@@ -127,7 +135,9 @@ const runCategoryDigestJob = async (
   const aiStatus = await context.ai.status();
   if (!aiStatus.configured) throw new Error("请先在 EdgeEver 工作区中配置默认 AI 模型。");
 
-  const categories = CATEGORIES.filter((category) => state.selectedCategoryIds.includes(category.id));
+  const preferences = await loadReaderPreferences(context);
+  state.selectedCategoryIds = preferences.selectedCategoryIds;
+  const categories = CATEGORIES.filter((category) => preferences.selectedCategoryIds.includes(category.id));
   if (!categories.length) throw new Error("请至少选择一个主题。");
   const sources = FEEDS.filter((feed) => state.selectedCategoryIds.includes(feed.categoryId));
   onStatus?.(`正在刷新订阅并准备 ${categories.length} 个分类日报…`);
@@ -142,7 +152,13 @@ const runCategoryDigestJob = async (
   const generatedAt = new Date();
   const dateKey = digestDateKey(generatedAt);
   const pending = categories.flatMap((category) => {
-    const articles = recentCategoryArticles(state.articles, category.id, generatedAt);
+    const articles = recentCategoryArticles(
+      state.articles,
+      category.id,
+      generatedAt,
+      preferences.digestMaxArticles,
+      preferences.digestWindowHours,
+    );
     return articles.length ? [{ category, articles }] : [];
   });
   let created = 0;
@@ -166,7 +182,14 @@ const runCategoryDigestJob = async (
         maxOutputTokens: 2_000,
       });
       const tags = digestTags(dateKey, item.category.id);
-      const contentMarkdown = buildDigestMarkdown({ title, category: item.category, generatedAt, articles: item.articles, aiMarkdown: ai.text });
+      const contentMarkdown = buildDigestMarkdown({
+        title,
+        category: item.category,
+        generatedAt,
+        articles: item.articles,
+        aiMarkdown: ai.text,
+        windowHours: preferences.digestWindowHours,
+      });
       const matches = await context.notes.query({
         notebookId,
         tags: [DAILY_DIGEST_TAG, `AI-RSS-Category-${item.category.id}`, `AI-RSS-Date-${dateKey}`],
@@ -188,6 +211,20 @@ const runCategoryDigestJob = async (
   return { state, created, updated, failed, skipped: categories.length - pending.length, lastNoteId };
 };
 
+const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> => {
+  if (!context.schedules) return;
+  const preferences = await loadReaderPreferences(context);
+  await context.schedules.upsert({
+    key: DAILY_DIGEST_SCHEDULE_KEY,
+    name: `EdgeEver RSS 分类日报（${preferences.digestGenerationTime}）`,
+    commandId: SCHEDULED_DIGEST_COMMAND_ID,
+    cronExpression: digestCronExpression(preferences.digestGenerationTime),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    missedRunPolicy: "run-once",
+    isEnabled: preferences.autoDigest,
+  });
+};
+
 class ReaderApp {
   private state: ReaderState = initialState();
   private notebooks: PluginNotebook[] = [];
@@ -199,8 +236,7 @@ class ReaderApp {
   private refreshButton: HTMLButtonElement | null = null;
   private recommendButton: HTMLButtonElement | null = null;
   private digestButton: HTMLButtonElement | null = null;
-  private scheduleButton: HTMLButtonElement | null = null;
-  private autoDigestEnabled = false;
+  private autoRefresh = true;
   private disposed = false;
 
   constructor(private readonly context: PluginContext) {}
@@ -208,9 +244,10 @@ class ReaderApp {
   async mount(container: HTMLElement): Promise<() => void> {
     const stored = await this.context.storage.get<ReaderState>(STATE_KEY);
     this.state = stored ? { ...initialState(), ...stored } : initialState();
+    const preferences = await loadReaderPreferences(this.context);
+    this.state.selectedCategoryIds = preferences.selectedCategoryIds;
+    this.autoRefresh = preferences.autoRefresh;
     this.notebooks = await this.context.notebooks.list().catch(() => []);
-    const schedules = await this.context.schedules?.list().catch(() => []);
-    this.autoDigestEnabled = schedules?.some((schedule) => schedule.key === DAILY_DIGEST_SCHEDULE_KEY && schedule.isEnabled) ?? false;
     if (!this.state.selectedNotebookId && this.notebooks[0]) {
       this.state.selectedNotebookId = this.notebooks[0].id;
       await this.persist();
@@ -220,7 +257,7 @@ class ReaderApp {
     container.replaceChildren(this.root);
     this.renderShell();
     this.renderArticles();
-    if (this.state.articles.length === 0) void this.refresh();
+    if (this.autoRefresh) void this.refresh();
 
     return () => {
       this.disposed = true;
@@ -241,7 +278,7 @@ class ReaderApp {
     this.recommendButton.addEventListener("click", () => void this.recommend());
     this.digestButton = element("button", "ear-button ear-button-secondary", "生成分类日报");
     this.digestButton.type = "button";
-    this.digestButton.title = "每个最近 24 小时内有文章的所选主题调用一次 AI";
+    this.digestButton.title = "每个在设置时间范围内有文章的所选主题调用一次 AI";
     this.digestButton.setAttribute("aria-label", "生成分类日报；每个有内容的所选主题调用一次 AI");
     this.digestButton.addEventListener("click", () => void this.generateDailyDigests());
     this.refreshButton = element("button", "ear-button ear-button-primary", "刷新订阅");
@@ -249,15 +286,12 @@ class ReaderApp {
     this.refreshButton.addEventListener("click", () => void this.refresh());
     const digestAction = element("div", "ear-digest-action");
     digestAction.append(this.digestButton, element("small", "ear-cost-hint", "每个有内容的主题调用 1 次 AI"));
-    this.scheduleButton = element("button", "ear-button ear-button-secondary", this.autoDigestEnabled ? "暂停每日自动日报" : "开启每日 08:00 日报");
-    this.scheduleButton.type = "button";
-    this.scheduleButton.title = "仅桌面端；每天 08:00 按所选主题生成，每个有内容的主题调用一次 AI";
-    this.scheduleButton.addEventListener("click", () => void this.toggleDailySchedule());
-    actions.append(digestAction, this.scheduleButton, this.recommendButton, this.refreshButton);
+    actions.append(digestAction, this.recommendButton, this.refreshButton);
     header.append(identity, actions);
 
     const controls = element("div", "ear-controls");
-    controls.append(this.renderCategories(), this.renderNotebookPicker());
+    const settingsHint = element("p", "ear-settings-hint", "订阅主题与日报参数请在 EdgeEver 插件设置中修改。");
+    controls.append(settingsHint, this.renderNotebookPicker());
     this.status = element("div", "ear-status", this.statusText());
     this.status.setAttribute("role", "status");
 
@@ -267,33 +301,6 @@ class ReaderApp {
     this.detail = element("article", "ear-detail");
     workspace.append(this.list, this.detail);
     this.root.replaceChildren(header, controls, this.status, workspace);
-  }
-
-  private renderCategories(): HTMLElement {
-    const group = element("fieldset", "ear-categories");
-    group.append(element("legend", "ear-control-label", "主题"));
-    for (const category of CATEGORIES) group.append(this.categoryChoice(category));
-    return group;
-  }
-
-  private categoryChoice(category: FeedCategory): HTMLElement {
-    const label = element("label", "ear-chip");
-    const input = element("input") as HTMLInputElement;
-    input.type = "checkbox";
-    input.checked = this.state.selectedCategoryIds.includes(category.id);
-    input.setAttribute("aria-describedby", `ear-category-${category.id}`);
-    input.addEventListener("change", () => {
-      const selected = new Set(this.state.selectedCategoryIds);
-      if (input.checked) selected.add(category.id);
-      else selected.delete(category.id);
-      this.state.selectedCategoryIds = [...selected];
-      void this.persist();
-    });
-    const copy = element("span", "ear-chip-copy");
-    copy.append(element("strong", "", category.name), element("small", "", category.description));
-    copy.id = `ear-category-${category.id}`;
-    label.append(input, copy);
-    return label;
   }
 
   private renderNotebookPicker(): HTMLElement {
@@ -332,11 +339,12 @@ class ReaderApp {
     if (this.refreshButton) this.refreshButton.disabled = busy;
     if (this.recommendButton) this.recommendButton.disabled = busy;
     if (this.digestButton) this.digestButton.disabled = busy;
-    if (this.scheduleButton) this.scheduleButton.disabled = busy;
     this.root?.setAttribute("aria-busy", String(busy));
   }
 
   private async refresh() {
+    const preferences = await loadReaderPreferences(this.context);
+    this.state.selectedCategoryIds = preferences.selectedCategoryIds;
     const sources = FEEDS.filter((feed) => this.state.selectedCategoryIds.includes(feed.categoryId));
     if (sources.length === 0) {
       this.context.ui.showNotice("请至少选择一个主题。");
@@ -520,40 +528,6 @@ class ReaderApp {
     }
   }
 
-  private async toggleDailySchedule() {
-    if (!this.context.schedules) {
-      this.context.ui.showNotice("每日自动日报仅在 EdgeEver 桌面端可用。");
-      return;
-    }
-    if (!this.state.selectedNotebookId) {
-      this.context.ui.showNotice("请先选择日报保存的笔记本。");
-      return;
-    }
-    const enable = !this.autoDigestEnabled;
-    this.scheduleButton!.disabled = true;
-    try {
-      await this.persist();
-      const schedule = await this.context.schedules.upsert({
-        key: DAILY_DIGEST_SCHEDULE_KEY,
-        name: "EdgeEver RSS 分类日报",
-        commandId: DAILY_DIGEST_COMMAND_ID,
-        cronExpression: "0 8 * * *",
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        missedRunPolicy: "run-once",
-        isEnabled: enable,
-      });
-      this.autoDigestEnabled = schedule.isEnabled;
-      this.scheduleButton!.textContent = this.autoDigestEnabled ? "暂停每日自动日报" : "开启每日 08:00 日报";
-      this.context.ui.showNotice(this.autoDigestEnabled
-        ? "已开启每日 08:00 分类日报；每个有内容的主题将调用一次 AI。"
-        : "已暂停每日自动分类日报。");
-    } catch {
-      this.context.ui.showNotice("自动日报设置失败；该功能仅支持 EdgeEver 桌面端。");
-    } finally {
-      this.scheduleButton!.disabled = false;
-    }
-  }
-
   private async saveNote(article: Article, button: HTMLButtonElement) {
     if (!this.state.selectedNotebookId) {
       this.context.ui.showNotice("没有可用的目标笔记本。");
@@ -593,7 +567,11 @@ class ReaderApp {
 }
 
 const plugin: EdgeEverPlugin = {
-  activate(context) {
+  async activate(context) {
+    const stored = await context.storage.get<ReaderState>(STATE_KEY);
+    const legacySchedules = await context.schedules?.list().catch(() => []);
+    const legacyAutoDigestEnabled = legacySchedules?.some((schedule) => schedule.key === LEGACY_DAILY_DIGEST_SCHEDULE_KEY && schedule.isEnabled) ?? false;
+    await migrateLegacyCategorySettings(context, stored?.selectedCategoryIds ?? null, legacyAutoDigestEnabled);
     const disposePanel = context.ui.panels.register({
       id: "reader",
       title: "EdgeEver AI RSS",
@@ -622,7 +600,31 @@ const plugin: EdgeEverPlugin = {
         }
       },
     });
+    const disposeScheduledDigestCommand = context.commands.register({
+      id: SCHEDULED_DIGEST_COMMAND_ID,
+      title: "执行已启用的 RSS 自动分类日报",
+      run: async () => {
+        const preferences = await loadReaderPreferences(context);
+        if (!preferences.autoDigest) return;
+        const result = await runCategoryDigestJob(context);
+        if (result.failed > 0 && result.created + result.updated === 0) {
+          throw new Error(`${result.failed} 个分类日报全部生成失败。`);
+        }
+      },
+    });
+    const disposeSettingsChanged = context.events.on("settings.changed", async ({ key }) => {
+      if (key !== AUTO_DIGEST_KEY && key !== DIGEST_GENERATION_TIME_KEY) return;
+      try {
+        await syncDailyDigestSchedule(context);
+      } catch {
+        context.ui.showNotice("设置已保存，但桌面日报计划暂时无法更新；重新启动 EdgeEver 后会重试。");
+      }
+    });
+    await context.schedules?.remove(LEGACY_DAILY_DIGEST_SCHEDULE_KEY).catch(() => undefined);
+    await syncDailyDigestSchedule(context).catch(() => undefined);
     return () => {
+      disposeSettingsChanged();
+      disposeScheduledDigestCommand();
       disposeDigestCommand();
       disposeCommand();
       disposePanel();

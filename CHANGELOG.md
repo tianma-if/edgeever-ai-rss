@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 — 2026-09-08
+
+- 精简宿主设置页文案，移除重复说明文字，并将 Token 消耗和设备时区提示直接并入字段标题。
+- Streamline the host-rendered settings copy by removing repetitive descriptions and moving Token-usage and device-timezone cues directly into field labels.
+
 ## 0.5.0 — 2026-09-08
 
 - 移除“打开 EdgeEver AI RSS”命令、独立阅读面板及其专属样式；保留统一设置页中的翻译设置。日报直接写入已有目标笔记本，目标失效或尚未选择时使用工作区首个笔记本。

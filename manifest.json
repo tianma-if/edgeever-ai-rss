@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "org.edgeever.plugins.ai-rss",
   "name": "EdgeEver AI RSS",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "apiVersion": "2",
   "settingsUi": "host",
   "description": "AI-generated daily digests from curated RSS and Atom feeds, saved directly to EdgeEver notes.",
@@ -11,23 +11,23 @@
   "platforms": ["web", "desktop"],
   "settings": {
     "fields": [
-      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "description": "模型、研究、工具与 AI 产品。", "default": true },
-      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "description": "工程实践、平台更新与开源生态。", "default": false },
-      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "description": "中文科技、产品与独立写作。", "default": false },
-      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "description": "自然科学、数学与航天。", "default": false },
-      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "description": "产品方法、Web 与交互设计。", "default": false },
-      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "description": "创业、公司与科技商业。", "default": false },
-      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "description": "漏洞、安全工程与隐私。", "default": false },
-      { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要", "description": "批量调用工作区默认 AI 翻译尚未处理或目标语言已变化的文章标题与摘要；默认开启，可能产生多次 AI 调用及相应费用。", "default": true },
-      { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "description": "设置文章标题与摘要的翻译目标语言。", "required": true, "default": "zh-CN", "options": [
+      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "default": true },
+      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "default": false },
+      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "default": false },
+      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "default": false },
+      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "default": false },
+      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "default": false },
+      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "default": false },
+      { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要（需要消耗 Token）", "default": true },
+      { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "required": true, "default": "zh-CN", "options": [
         { "value": "zh-CN", "label": "简体中文" },
         { "value": "zh-TW", "label": "繁体中文" },
         { "value": "en", "label": "英语" },
         { "value": "ja", "label": "日语" },
         { "value": "ko", "label": "韩语" }
       ] },
-      { "key": "digest.auto-enabled", "type": "boolean", "label": "每日自动生成分类日报", "description": "桌面端按设定时间自动生成到工作区首个笔记本；每个有内容的主题调用一次工作区默认 AI。默认关闭。", "default": false },
-      { "key": "digest.generation-time", "type": "select", "label": "日报生成时间", "description": "使用当前设备时区；保存后立即更新桌面端计划。", "required": true, "default": "08:00", "options": [
+      { "key": "digest.auto-enabled", "type": "boolean", "label": "每日自动生成分类日报（需要消耗 Token）", "default": false },
+      { "key": "digest.generation-time", "type": "select", "label": "日报生成时间（设备时区）", "required": true, "default": "08:00", "options": [
         { "value": "00:00", "label": "00:00" },
         { "value": "01:00", "label": "01:00" },
         { "value": "02:00", "label": "02:00" },
@@ -53,8 +53,8 @@
         { "value": "22:00", "label": "22:00" },
         { "value": "23:00", "label": "23:00" }
       ] },
-      { "key": "digest.window-hours", "type": "number", "label": "日报时间范围（小时）", "description": "每篇分类日报向前汇总的时间范围，可设置为 1 至 168 小时。", "default": 24, "min": 1, "max": 168, "step": 1 },
-      { "key": "digest.max-articles", "type": "number", "label": "每个分类的文章上限", "description": "单篇分类日报最多交给 AI 处理的文章数量，可设置为 1 至 40。", "default": 20, "min": 1, "max": 40, "step": 1 }
+      { "key": "digest.window-hours", "type": "number", "label": "日报时间范围（小时）", "default": 24, "min": 1, "max": 168, "step": 1 },
+      { "key": "digest.max-articles", "type": "number", "label": "每个分类的文章上限", "default": 20, "min": 1, "max": 40, "step": 1 }
     ]
   },
   "permissions": [

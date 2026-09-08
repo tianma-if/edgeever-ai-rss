@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { CATEGORIES, FEEDS } from "../src/catalog";
 import {
   buildDigestMarkdown,
+  digestArticlePayload,
   digestDateKey,
   digestTags,
   digestTitle,
@@ -92,5 +93,13 @@ describe("category digest", () => {
     expect(markdown).toContain("## 来源");
     expect(markdown).toContain("最近 48 小时");
     expect(markdown).toContain("[A useful \\[update\\]](<https://example.com/update>)");
+  });
+
+  test("includes translated summaries in the AI payload", () => {
+    expect(digestArticlePayload([article({ summary: "翻译后的摘要", content: "Original body" })])[0]).toMatchObject({
+      title: "A useful [update]",
+      summary: "翻译后的摘要",
+      excerpt: "Original body",
+    });
   });
 });

@@ -82,6 +82,7 @@ export const digestArticlePayload = (articles: Article[]) => articles.map((artic
   title: article.title,
   source: article.sourceName,
   publishedAt: article.publishedAt,
+  summary: article.summary.slice(0, 800),
   excerpt: (article.content || article.summary).slice(0, 3_000),
   relatedCoverage: article.relatedCoverage?.map((coverage) => ({
     source: coverage.sourceName,

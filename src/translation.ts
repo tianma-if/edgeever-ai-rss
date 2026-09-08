@@ -37,6 +37,14 @@ export const headlineTranslationIsCurrent = (
   && translation.sourceSignature === headlineSourceSignature(article),
 );
 
+export const applyHeadlineTranslation = (
+  article: Article,
+  translation: HeadlineTranslation | undefined,
+  target: TranslationTarget,
+): Article => headlineTranslationIsCurrent(article, translation, target)
+  ? { ...article, title: translation!.title, summary: translation!.summary || article.summary }
+  : article;
+
 const extractJson = (value: string): unknown => {
   const fenced = value.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
   const candidate = fenced ?? value.slice(value.indexOf("["), value.lastIndexOf("]") + 1);

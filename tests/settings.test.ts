@@ -1,14 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { digestCronExpression, resolveReaderPreferences } from "../src/settings";
 
-describe("reader settings", () => {
+describe("digest settings", () => {
   test("resolves host-rendered settings into bounded runtime preferences", () => {
     const preferences = resolveReaderPreferences({
       "topics.ai": true,
       "topics.science": true,
       "digest.window-hours": 999,
       "digest.max-articles": 0,
-      "reader.auto-refresh": false,
       "translation.auto-enabled": false,
       "translation.target-language": "ja",
       "digest.auto-enabled": true,
@@ -17,7 +16,6 @@ describe("reader settings", () => {
     expect(preferences.selectedCategoryIds).toEqual(["ai", "science"]);
     expect(preferences.digestWindowHours).toBe(168);
     expect(preferences.digestMaxArticles).toBe(1);
-    expect(preferences.autoRefresh).toBe(false);
     expect(preferences.autoTranslate).toBe(false);
     expect(preferences.translationTarget).toBe("ja");
     expect(preferences.autoDigest).toBe(true);
@@ -30,7 +28,6 @@ describe("reader settings", () => {
     expect(preferences.selectedCategoryIds).toEqual([]);
     expect(preferences.digestWindowHours).toBe(24);
     expect(preferences.digestMaxArticles).toBe(20);
-    expect(preferences.autoRefresh).toBe(true);
     expect(preferences.autoTranslate).toBe(true);
     expect(preferences.translationTarget).toBe("zh-CN");
     expect(preferences.autoDigest).toBe(false);

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { Article } from "../src/feed";
 import {
+  applyHeadlineTranslation,
   headlineSourceSignature,
   headlineTranslationIsCurrent,
   parseHeadlineTranslations,
@@ -40,6 +41,11 @@ describe("automatic headline translation", () => {
     };
     expect(headlineTranslationIsCurrent({ ...article, summary: "Changed" }, translation, "zh-CN")).toBe(false);
     expect(headlineTranslationIsCurrent(article, translation, "ja")).toBe(false);
+    expect(applyHeadlineTranslation(article, translation, "zh-CN")).toMatchObject({
+      title: "模型更新",
+      summary: "该模型速度更快。",
+    });
+    expect(applyHeadlineTranslation(article, translation, "ja")).toBe(article);
   });
 
   test("skips AI when source language already matches the target", () => {

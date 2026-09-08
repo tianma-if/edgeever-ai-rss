@@ -7,7 +7,6 @@ export const SETTINGS_MIGRATION_KEY = "settings-schema-v1-migrated";
 export const categorySettingKey = (categoryId: string): string => `topics.${categoryId}`;
 export const DIGEST_WINDOW_HOURS_KEY = "digest.window-hours";
 export const DIGEST_MAX_ARTICLES_KEY = "digest.max-articles";
-export const AUTO_REFRESH_KEY = "reader.auto-refresh";
 export const AUTO_DIGEST_KEY = "digest.auto-enabled";
 export const DIGEST_GENERATION_TIME_KEY = "digest.generation-time";
 export const AUTO_TRANSLATE_KEY = "translation.auto-enabled";
@@ -17,7 +16,6 @@ export interface ReaderPreferences {
   selectedCategoryIds: string[];
   digestWindowHours: number;
   digestMaxArticles: number;
-  autoRefresh: boolean;
   autoDigest: boolean;
   digestGenerationTime: string;
   autoTranslate: boolean;
@@ -33,7 +31,6 @@ export const resolveReaderPreferences = (values: Record<string, PluginSettingVal
     .map((category) => category.id),
   digestWindowHours: boundedNumber(values[DIGEST_WINDOW_HOURS_KEY], 24, 1, 168),
   digestMaxArticles: boundedNumber(values[DIGEST_MAX_ARTICLES_KEY], 20, 1, 40),
-  autoRefresh: values[AUTO_REFRESH_KEY] !== false,
   autoDigest: values[AUTO_DIGEST_KEY] === true,
   autoTranslate: values[AUTO_TRANSLATE_KEY] !== false,
   translationTarget: isTranslationTarget(values[TRANSLATION_TARGET_KEY]) ? values[TRANSLATION_TARGET_KEY] : "zh-CN",
@@ -47,7 +44,6 @@ export const loadReaderPreferences = async (context: PluginContext): Promise<Rea
     ...CATEGORIES.map((category) => categorySettingKey(category.id)),
     DIGEST_WINDOW_HOURS_KEY,
     DIGEST_MAX_ARTICLES_KEY,
-    AUTO_REFRESH_KEY,
     AUTO_DIGEST_KEY,
     DIGEST_GENERATION_TIME_KEY,
     AUTO_TRANSLATE_KEY,

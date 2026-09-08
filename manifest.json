@@ -2,10 +2,10 @@
   "type": "plugin",
   "id": "org.edgeever.plugins.ai-rss",
   "name": "EdgeEver AI RSS",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "apiVersion": "2",
   "settingsUi": "host",
-  "description": "AI-first RSS and Atom reading, translation, summarization, filtering, recommendations, and note capture.",
+  "description": "AI-generated daily digests from curated RSS and Atom feeds, saved directly to EdgeEver notes.",
   "author": "EdgeEver",
   "entry": "./main.js",
   "platforms": ["web", "desktop"],
@@ -18,16 +18,15 @@
       { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "description": "产品方法、Web 与交互设计。", "default": false },
       { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "description": "创业、公司与科技商业。", "default": false },
       { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "description": "漏洞、安全工程与隐私。", "default": false },
-      { "key": "reader.auto-refresh", "type": "boolean", "label": "打开时自动刷新", "description": "每次打开阅读面板时获取所选主题的最新公开订阅。", "default": true },
-      { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要", "description": "刷新后批量调用工作区默认 AI，翻译尚未处理或目标语言已变化的文章标题与摘要；默认开启，首次刷新可能产生多次 AI 调用及相应费用。", "default": true },
-      { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "description": "仅影响标题与摘要的自动翻译；正文翻译暂不跟随此设置。", "required": true, "default": "zh-CN", "options": [
+      { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要", "description": "批量调用工作区默认 AI 翻译尚未处理或目标语言已变化的文章标题与摘要；默认开启，可能产生多次 AI 调用及相应费用。", "default": true },
+      { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "description": "设置文章标题与摘要的翻译目标语言。", "required": true, "default": "zh-CN", "options": [
         { "value": "zh-CN", "label": "简体中文" },
         { "value": "zh-TW", "label": "繁体中文" },
         { "value": "en", "label": "英语" },
         { "value": "ja", "label": "日语" },
         { "value": "ko", "label": "韩语" }
       ] },
-      { "key": "digest.auto-enabled", "type": "boolean", "label": "每日自动生成分类日报", "description": "桌面端按设定时间自动生成；每个有内容的主题调用一次工作区默认 AI。启用前请先在阅读面板选择目标笔记本。默认关闭。", "default": false },
+      { "key": "digest.auto-enabled", "type": "boolean", "label": "每日自动生成分类日报", "description": "桌面端按设定时间自动生成到工作区首个笔记本；每个有内容的主题调用一次工作区默认 AI。默认关闭。", "default": false },
       { "key": "digest.generation-time", "type": "select", "label": "日报生成时间", "description": "使用当前设备时区；保存后立即更新桌面端计划。", "required": true, "default": "08:00", "options": [
         { "value": "00:00", "label": "00:00" },
         { "value": "01:00", "label": "01:00" },
@@ -68,7 +67,6 @@
     "schedules",
     "metadata:read",
     "ui:commands",
-    "ui:notices",
-    "ui:panels"
+    "ui:notices"
   ]
 }

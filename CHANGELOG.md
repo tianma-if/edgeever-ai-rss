@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 — 2026-09-08
+
+- 移除“打开 EdgeEver AI RSS”命令、独立阅读面板及其专属样式；保留统一设置页中的翻译设置。日报直接写入已有目标笔记本，目标失效或尚未选择时使用工作区首个笔记本。
+- Remove the “Open EdgeEver AI RSS” command, standalone reader panel, and panel-only styles while preserving translation controls in the unified settings page. Digests now write to the previous valid target notebook or fall back to the workspace's first notebook.
+- 将自动翻译与目标语言设置接入手动和自动日报流程，缓存有效译文，并在翻译失败时继续生成日报。
+- Apply automatic translation and target-language settings to manual and scheduled digest runs, caching valid translations while allowing digest generation to continue after translation failures.
+
 ## 0.4.0 — 2026-09-08
 
 - 将“AI 前沿”扩充至 18 个经在线验证的直连来源，新增 Google DeepMind、Apple Machine Learning Research、MIT AI News 等一手研究来源。

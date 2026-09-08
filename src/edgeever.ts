@@ -96,17 +96,6 @@ export interface PluginContext {
   };
   ui: {
     showNotice(message: string): void;
-    openNote(noteId: string): Promise<void>;
-    panels: {
-      register(panel: {
-        id: string;
-        title: string;
-        purpose: "workflow" | "dashboard" | "preview" | "onboarding";
-        presentation?: "dialog" | "fullscreen";
-        mount(container: HTMLElement): void | (() => void) | Promise<void | (() => void)>;
-      }): () => void;
-      open(panelId: string): Promise<void>;
-    };
   };
 }
 

@@ -18,7 +18,6 @@ const STATE_KEY = "reader-state-v1";
 const MAX_CACHED_ARTICLES = 240;
 const AUTO_TRANSLATION_BATCH_SIZE = 20;
 const DAILY_DIGEST_COMMAND_ID = "generate-daily-category-digests";
-const SCHEDULED_DIGEST_COMMAND_ID = "run-scheduled-daily-category-digests";
 const LEGACY_DAILY_DIGEST_SCHEDULE_KEY = "daily-category-digests";
 const DAILY_DIGEST_SCHEDULE_KEY = "daily-category-digests-v2";
 
@@ -200,7 +199,7 @@ const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> =>
   await context.schedules.upsert({
     key: DAILY_DIGEST_SCHEDULE_KEY,
     name: `EdgeEver RSS 分类日报（${preferences.digestGenerationTime}）`,
-    commandId: SCHEDULED_DIGEST_COMMAND_ID,
+    commandId: DAILY_DIGEST_COMMAND_ID,
     cronExpression: digestCronExpression(preferences.digestGenerationTime),
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     missedRunPolicy: "run-once",
@@ -232,16 +231,6 @@ const plugin: EdgeEverPlugin = {
         }
       },
     });
-    const disposeScheduledDigestCommand = context.commands.register({
-      id: SCHEDULED_DIGEST_COMMAND_ID,
-      title: "执行已启用的 RSS 自动分类日报",
-      run: async () => {
-        const preferences = await loadReaderPreferences(context);
-        if (!preferences.autoDigest) return;
-        const result = await runCategoryDigestJob(context);
-        if (result.failed > 0 && result.created + result.updated === 0) throw new Error(`${result.failed} 个分类日报全部生成失败。`);
-      },
-    });
     const disposeSettingsChanged = context.events.on("settings.changed", async ({ key }) => {
       if (key !== AUTO_DIGEST_KEY && key !== DIGEST_GENERATION_TIME_KEY) return;
       try {
@@ -254,7 +243,6 @@ const plugin: EdgeEverPlugin = {
     await syncDailyDigestSchedule(context).catch(() => undefined);
     return () => {
       disposeSettingsChanged();
-      disposeScheduledDigestCommand();
       disposeDigestCommand();
     };
   },

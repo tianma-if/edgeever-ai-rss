@@ -4,6 +4,8 @@
 
 - 精简宿主设置页文案，移除重复说明文字，并将 Token 消耗和设备时区提示直接并入字段标题。
 - Streamline the host-rendered settings copy by removing repetitive descriptions and moving Token-usage and device-timezone cues directly into field labels.
+- 手动生成与桌面定时计划复用同一个日报命令，插件卡片只保留一个执行按钮。
+- Reuse one digest command for manual runs and the desktop schedule so the plugin card exposes only one run button.
 
 ## 0.5.0 — 2026-09-08
 

@@ -1,0 +1,24 @@
+{
+  "name": "edgeever-ai-rss",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI-first RSS and Atom reader for EdgeEver.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "verify:release": "node scripts/verify-release.mjs",
+    "check": "bun run typecheck && bun run test && bun run build"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.9",
+    "typescript": "^5.9.2"
+  }
+}

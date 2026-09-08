@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "org.edgeever.plugins.ai-rss",
   "name": "EdgeEver AI RSS",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "apiVersion": "2",
   "settingsUi": "host",
   "description": "AI-first RSS and Atom reading, translation, summarization, filtering, recommendations, and note capture.",

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 — 2026-09-08
 
 - 将“AI 前沿”扩充至 18 个经在线验证的直连来源，新增 Google DeepMind、Apple Machine Learning Research、MIT AI News 等一手研究来源。
 - 阅读列表与日报候选通过规范化链接、规范化标题及限时高置信度相似标题进行跨来源事件聚类，保留其他佐证来源；日报同时覆盖可用来源角色并限制单一来源占比。

@@ -43,8 +43,39 @@ describe("category digest", () => {
     expect(result.map((item) => item.id)).toEqual(["article-1"]);
     expect(recentCategoryArticles([
       article(),
-      article({ id: "older", publishedAt: "2026-09-07T11:59:59.000Z" }),
+      article({ id: "older", title: "An older update", url: "https://example.com/older", publishedAt: "2026-09-07T11:59:59.000Z" }),
     ], "ai", now, 20, 48).map((item) => item.id)).toEqual(["article-1", "older"]);
+  });
+
+  test("deduplicates normalized links and titles", () => {
+    const now = new Date("2026-09-08T12:00:00.000Z");
+    const result = recentCategoryArticles([
+      article({ id: "tracking", url: "https://example.com/update/?utm_source=newsletter" }),
+      article({ id: "canonical", url: "https://example.com/update" }),
+      article({ id: "same-title", sourceId: "other-source", sourceName: "Other source", url: "https://example.com/elsewhere", title: "A useful update!" }),
+    ], "ai", now);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe("tracking");
+    expect(result[0]?.relatedCoverage).toHaveLength(2);
+  });
+
+  test("represents available source roles without letting one source dominate", () => {
+    const now = new Date("2026-09-08T12:00:00.000Z");
+    const result = recentCategoryArticles([
+      ...Array.from({ length: 8 }, (_, index) => article({
+        id: `loud-${index}`,
+        sourceId: "loud",
+        sourceRole: "practitioner",
+        title: `Loud source ${index}`,
+        url: `https://example.com/loud/${index}`,
+        publishedAt: `2026-09-08T${String(11 - index).padStart(2, "0")}:00:00.000Z`,
+      })),
+      article({ id: "official", sourceId: "official", sourceRole: "official", title: "Official", url: "https://example.com/official" }),
+      article({ id: "research", sourceId: "research", sourceRole: "research", title: "Research", url: "https://example.com/research" }),
+      article({ id: "briefing", sourceId: "briefing", sourceRole: "briefing", title: "Briefing", url: "https://example.com/briefing" }),
+    ], "ai", now, 5);
+    expect(new Set(result.map((item) => item.sourceRole))).toEqual(new Set(["practitioner", "official", "research", "briefing"]));
+    expect(result.filter((item) => item.sourceId === "loud")).toHaveLength(2);
   });
 
   test("builds a traceable note with deterministic sources", () => {

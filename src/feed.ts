@@ -14,6 +14,17 @@ export interface Article {
   summary: string;
   content: string;
   language: "zh" | "en";
+  sourceRole?: FeedSource["digestRole"];
+  relatedCoverage?: RelatedCoverage[];
+}
+
+export interface RelatedCoverage {
+  articleId: string;
+  sourceId: string;
+  sourceName: string;
+  title: string;
+  url: string;
+  publishedAt: string | null;
 }
 
 const parser = new XMLParser({
@@ -98,6 +109,7 @@ const normalizeItem = (item: Record<string, unknown>, source: FeedSource, atom: 
     summary,
     content,
     language: source.language,
+    sourceRole: source.digestRole,
   };
 };
 

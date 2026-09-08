@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "check:feeds": "bun scripts/check-feeds.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "verify:release": "node scripts/verify-release.mjs",

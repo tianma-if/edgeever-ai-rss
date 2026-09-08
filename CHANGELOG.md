@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- 将“AI 前沿”扩充至 18 个经在线验证的直连来源，新增 Google DeepMind、Apple Machine Learning Research、MIT AI News 等一手研究来源。
+- 阅读列表与日报候选通过规范化链接、规范化标题及限时高置信度相似标题进行跨来源事件聚类，保留其他佐证来源；日报同时覆盖可用来源角色并限制单一来源占比。
+- 增加可重复执行的在线订阅源健康检查，以及目录覆盖度、唯一性、HTTPS、去重与来源均衡测试。
+- Expand AI coverage to 18 live-verified direct feeds, including first-party research from Google DeepMind, Apple Machine Learning Research, and MIT AI News.
+- Cluster cross-source events in the reader and digest by normalized URL, normalized title, and time-bounded high-confidence near-title matches while retaining corroborating sources; also represent available source roles and cap individual sources.
+- Add a repeatable live feed health check plus catalog coverage, uniqueness, HTTPS, deduplication, and source-balance tests.
+
 ## 0.3.0 — 2026-09-08
 
 - Adopt EdgeEver plugin API v2, including the mandatory host-rendered settings policy and explicit dashboard panel purpose.

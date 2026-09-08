@@ -12,6 +12,7 @@ export interface FeedSource {
   url: string;
   siteUrl: string;
   language: "zh" | "en";
+  digestRole?: "official" | "briefing" | "research" | "analysis" | "practitioner" | "interview";
 }
 
 export const CATEGORIES: FeedCategory[] = [
@@ -24,10 +25,28 @@ export const CATEGORIES: FeedCategory[] = [
   { id: "security", name: "安全与隐私", description: "漏洞、安全工程与隐私" },
 ];
 
+// AI source candidates were informed by QMReader's MIT-licensed registry, then
+// independently checked for direct HTTPS RSS/Atom access and parser compatibility.
+// https://github.com/joeseesun/qmreader/blob/main/lib/sources.js
 export const FEEDS: FeedSource[] = [
-  { id: "openai-news", categoryId: "ai", name: "OpenAI News", url: "https://openai.com/news/rss.xml", siteUrl: "https://openai.com/news/", language: "en" },
-  { id: "google-ai", categoryId: "ai", name: "Google AI", url: "https://blog.google/innovation-and-ai/technology/ai/rss/", siteUrl: "https://blog.google/innovation-and-ai/technology/ai/", language: "en" },
-  { id: "hugging-face", categoryId: "ai", name: "Hugging Face", url: "https://huggingface.co/blog/feed.xml", siteUrl: "https://huggingface.co/blog", language: "en" },
+  { id: "openai-news", categoryId: "ai", name: "OpenAI News", url: "https://openai.com/news/rss.xml", siteUrl: "https://openai.com/news/", language: "en", digestRole: "official" },
+  { id: "google-ai", categoryId: "ai", name: "Google AI", url: "https://blog.google/innovation-and-ai/technology/ai/rss/", siteUrl: "https://blog.google/innovation-and-ai/technology/ai/", language: "en", digestRole: "official" },
+  { id: "google-deepmind", categoryId: "ai", name: "Google DeepMind", url: "https://deepmind.google/blog/rss.xml", siteUrl: "https://deepmind.google/discover/blog/", language: "en", digestRole: "research" },
+  { id: "apple-ml", categoryId: "ai", name: "Apple Machine Learning Research", url: "https://machinelearning.apple.com/rss.xml", siteUrl: "https://machinelearning.apple.com", language: "en", digestRole: "research" },
+  { id: "mit-ai", categoryId: "ai", name: "MIT AI News", url: "https://news.mit.edu/rss/topic/artificial-intelligence2", siteUrl: "https://news.mit.edu/topic/artificial-intelligence2", language: "en", digestRole: "research" },
+  { id: "hugging-face", categoryId: "ai", name: "Hugging Face", url: "https://huggingface.co/blog/feed.xml", siteUrl: "https://huggingface.co/blog", language: "en", digestRole: "official" },
+  { id: "tldr-ai", categoryId: "ai", name: "TLDR AI", url: "https://tldr.tech/api/rss/ai", siteUrl: "https://tldr.tech/ai", language: "en", digestRole: "briefing" },
+  { id: "bens-bites", categoryId: "ai", name: "Ben's Bites", url: "https://www.bensbites.com/feed", siteUrl: "https://www.bensbites.com", language: "en", digestRole: "briefing" },
+  { id: "import-ai", categoryId: "ai", name: "Import AI", url: "https://importai.substack.com/feed", siteUrl: "https://importai.substack.com", language: "en", digestRole: "analysis" },
+  { id: "nlp-newsletter", categoryId: "ai", name: "NLP Newsletter", url: "https://nlp.elvissaravia.com/feed", siteUrl: "https://nlp.elvissaravia.com", language: "en", digestRole: "analysis" },
+  { id: "interconnects", categoryId: "ai", name: "Interconnects", url: "https://www.interconnects.ai/feed", siteUrl: "https://www.interconnects.ai", language: "en", digestRole: "analysis" },
+  { id: "one-useful-thing", categoryId: "ai", name: "One Useful Thing", url: "https://www.oneusefulthing.org/feed", siteUrl: "https://www.oneusefulthing.org", language: "en", digestRole: "analysis" },
+  { id: "science-space", categoryId: "ai", name: "科学空间", url: "https://kexue.fm/feed", siteUrl: "https://kexue.fm", language: "zh", digestRole: "research" },
+  { id: "chinai", categoryId: "ai", name: "ChinAI Newsletter", url: "https://chinai.substack.com/feed", siteUrl: "https://chinai.substack.com", language: "en", digestRole: "analysis" },
+  { id: "simon-willison", categoryId: "ai", name: "Simon Willison's Weblog", url: "https://simonwillison.net/atom/everything/", siteUrl: "https://simonwillison.net", language: "en", digestRole: "practitioner" },
+  { id: "gary-marcus", categoryId: "ai", name: "Gary Marcus", url: "https://garymarcus.substack.com/feed", siteUrl: "https://garymarcus.substack.com", language: "en", digestRole: "practitioner" },
+  { id: "dwarkesh", categoryId: "ai", name: "Dwarkesh Patel", url: "https://www.dwarkeshpatel.com/feed", siteUrl: "https://www.dwarkeshpatel.com", language: "en", digestRole: "interview" },
+  { id: "latent-space", categoryId: "ai", name: "Latent Space", url: "https://www.latent.space/feed", siteUrl: "https://www.latent.space", language: "en", digestRole: "interview" },
   { id: "github-changelog", categoryId: "engineering", name: "GitHub Changelog", url: "https://github.blog/changelog/feed/", siteUrl: "https://github.blog/changelog/", language: "en" },
   { id: "cloudflare-blog", categoryId: "engineering", name: "Cloudflare Blog", url: "https://blog.cloudflare.com/rss/", siteUrl: "https://blog.cloudflare.com/", language: "en" },
   { id: "sspai", categoryId: "chinese", name: "少数派", url: "https://sspai.com/feed", siteUrl: "https://sspai.com/", language: "zh" },

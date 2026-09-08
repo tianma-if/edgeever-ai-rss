@@ -1,4 +1,5 @@
 import { CATEGORIES, DEFAULT_CATEGORY_IDS, FEEDS } from "./catalog";
+import { articleFreshness, clusterRelatedArticles } from "./dedupe";
 import type { EdgeEverPlugin, PluginContext, PluginNotebook } from "./edgeever";
 import {
   buildDigestMarkdown,
@@ -106,12 +107,29 @@ const extractJson = (value: string): unknown => {
 const mergeReaderArticles = (state: ReaderState, articles: Article[]): ReaderState => {
   const merged = new Map(state.articles.map((article) => [article.id, article]));
   for (const article of articles) merged.set(article.id, article);
+  const clustered = clusterRelatedArticles(
+    [...merged.values()].filter((article) => state.selectedCategoryIds.includes(article.categoryId)),
+  );
+  const representativeByArticleId = new Map<string, string>();
+  for (const article of clustered) {
+    representativeByArticleId.set(article.id, article.id);
+    for (const coverage of article.relatedCoverage ?? []) representativeByArticleId.set(coverage.articleId, article.id);
+  }
+  const aiReadings = { ...state.aiReadings };
+  for (const [articleId, reading] of Object.entries(state.aiReadings)) {
+    const representativeId = representativeByArticleId.get(articleId);
+    if (representativeId && !aiReadings[representativeId]) aiReadings[representativeId] = reading;
+  }
+  const recommendations = state.recommendations
+    .map((recommendation) => ({ ...recommendation, articleId: representativeByArticleId.get(recommendation.articleId) ?? recommendation.articleId }))
+    .filter((recommendation, index, all) => all.findIndex((candidate) => candidate.articleId === recommendation.articleId) === index);
   return {
     ...state,
-    articles: [...merged.values()]
-      .filter((article) => state.selectedCategoryIds.includes(article.categoryId))
-      .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    articles: clustered
+      .sort((a, b) => articleFreshness(b).localeCompare(articleFreshness(a)))
       .slice(0, MAX_CACHED_ARTICLES),
+    aiReadings,
+    recommendations,
   };
 };
 
@@ -121,6 +139,7 @@ interface DigestJobResult {
   updated: number;
   failed: number;
   skipped: number;
+  sourceFailures: number;
   lastNoteId: string | null;
 }
 
@@ -142,6 +161,7 @@ const runCategoryDigestJob = async (
   const sources = FEEDS.filter((feed) => state.selectedCategoryIds.includes(feed.categoryId));
   onStatus?.(`正在刷新订阅并准备 ${categories.length} 个分类日报…`);
   const fetched = await mapLimit(sources, 3, (source) => fetchFeed(context, source));
+  const sourceFailures = fetched.filter((result) => result.status === "rejected").length;
   state = mergeReaderArticles(
     state,
     fetched.flatMap((result) => result.status === "fulfilled" ? result.value : []),
@@ -177,6 +197,7 @@ const runCategoryDigestJob = async (
           "根据候选文章输出简洁的 Markdown 日报正文，不要输出一级标题，也不要自行添加来源列表。",
           "依次包含“## 今日概览”“## 值得关注”“## 趋势与联系”三个部分。",
           "每个重要判断使用〔数字〕引用候选文章编号；只使用提供的信息，不得虚构或把多篇文章的观点混为事实。",
+          "多篇文章报道同一事件时合并叙述，说明它们是重复覆盖或不同视角，不要把重复报道误判为多个独立趋势。",
         ].join(""),
         prompt: JSON.stringify({ category: item.category.name, articles: digestArticlePayload(item.articles) }),
         maxOutputTokens: 2_000,
@@ -208,7 +229,7 @@ const runCategoryDigestJob = async (
     }
   }
 
-  return { state, created, updated, failed, skipped: categories.length - pending.length, lastNoteId };
+  return { state, created, updated, failed, skipped: categories.length - pending.length, sourceFailures, lastNoteId };
 };
 
 const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> => {
@@ -369,7 +390,7 @@ class ReaderApp {
       const left = preferred.get(a.id);
       const right = preferred.get(b.id);
       if (left !== undefined || right !== undefined) return (left ?? Number.MAX_SAFE_INTEGER) - (right ?? Number.MAX_SAFE_INTEGER);
-      return (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "");
+      return articleFreshness(b).localeCompare(articleFreshness(a));
     });
   }
 
@@ -391,6 +412,7 @@ class ReaderApp {
       const excerpt = element("span", "ear-article-excerpt", article.summary || article.content.slice(0, 180) || "暂无摘要");
       const recommendation = this.state.recommendations.find((item) => item.articleId === article.id);
       button.append(meta, title, excerpt);
+      if (article.relatedCoverage?.length) button.append(element("span", "ear-reason", `同一事件另有 ${article.relatedCoverage.length} 个来源`));
       if (recommendation) button.append(element("span", "ear-reason", `推荐：${recommendation.reason}`));
       button.addEventListener("click", () => {
         this.selectedArticleId = article.id;
@@ -423,6 +445,18 @@ class ReaderApp {
     toolbar.append(summarize, translate, save, safeExternalLink("打开原文 ↗", article.url));
     const body = element("p", "ear-body", article.content || article.summary || "订阅源没有提供正文摘要，请打开原文阅读。");
     this.detail.append(eyebrow, heading, toolbar, body);
+
+    if (article.relatedCoverage?.length) {
+      const related = element("section", "ear-ai-card");
+      const list = element("ul");
+      for (const coverage of article.relatedCoverage) {
+        const item = element("li");
+        item.append(safeExternalLink(`${coverage.sourceName}：${coverage.title}`, coverage.url));
+        list.append(item);
+      }
+      related.append(element("span", "ear-kicker", "同一事件的其他来源"), list);
+      this.detail.append(related);
+    }
 
     const reading = this.state.aiReadings[article.id];
     if (reading?.summary) this.detail.append(this.aiSection("AI 总结", reading.summary));
@@ -519,7 +553,8 @@ class ReaderApp {
       this.renderArticles();
       const failureText = result.failed ? `，${result.failed} 个失败` : "";
       const skippedText = result.skipped ? `，跳过 ${result.skipped} 个空分类` : "";
-      this.context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${skippedText}${failureText}。`);
+      const sourceFailureText = result.sourceFailures ? `，${result.sourceFailures} 个订阅源读取失败` : "";
+      this.context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${skippedText}${failureText}${sourceFailureText}。`);
       if (result.lastNoteId) await this.context.ui.openNote(result.lastNoteId);
     } catch (error) {
       this.context.ui.showNotice(error instanceof Error ? error.message : "分类日报生成失败。");
@@ -544,6 +579,9 @@ class ReaderApp {
       article.summary || article.content.slice(0, 1_500) || "订阅源未提供摘要。",
       reading?.summary ? `## AI 总结\n\n${reading.summary}` : "",
       reading?.translation ? `## 中文翻译\n\n${reading.translation}` : "",
+      article.relatedCoverage?.length
+        ? `## 同一事件的其他来源\n\n${article.relatedCoverage.map((coverage) => `- [${markdownEscape(coverage.title)}](<${coverage.url}>) — ${markdownEscape(coverage.sourceName)}`).join("\n")}`
+        : "",
     ].filter(Boolean);
     try {
       const note = await this.context.notes.create({
@@ -594,7 +632,9 @@ const plugin: EdgeEverPlugin = {
             throw new Error(`${result.failed} 个分类日报全部生成失败。`);
           }
           const failureText = result.failed ? `，${result.failed} 个失败` : "";
-          context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${failureText}。`);
+          const skippedText = result.skipped ? `，跳过 ${result.skipped} 个空分类` : "";
+          const sourceFailureText = result.sourceFailures ? `，${result.sourceFailures} 个订阅源读取失败` : "";
+          context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${skippedText}${failureText}${sourceFailureText}。`);
         } catch (error) {
           context.ui.showNotice(error instanceof Error ? error.message : "分类日报生成失败。");
           throw error;

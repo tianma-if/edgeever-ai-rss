@@ -29,9 +29,9 @@ bun run check
 
 The build produces the `main.js` and `styles.css` assets required by EdgeEver. Publish those files together with the root `manifest.json` in a matching GitHub Release.
 
-插件通过 EdgeEver 的匿名只读公开网络能力获取内容，不携带 Cookie、账号凭据或敏感请求头。当前界面先提供经过验证的精选来源；后续可以在不扩展清单权限的前提下支持用户添加任意公开 HTTPS RSS/Atom 地址。
+插件主动使用 EdgeEver 的匿名只读公开网络传输获取内容，不携带 Cookie、账号凭据或敏感请求头。Manifest 中列出的能力仅用于向用户说明插件用途，不是逐项授权门禁。当前界面先提供经过验证的精选来源；后续可以直接支持用户添加任意公开 HTTPS RSS/Atom 地址。
 
-The plugin fetches content through EdgeEver's anonymous, read-only public network capability without cookies, account credentials, or sensitive request headers. The current interface starts with verified curated sources and can later accept arbitrary public HTTPS RSS/Atom URLs without expanding manifest permissions.
+The plugin deliberately uses EdgeEver's anonymous, read-only public network transport without cookies, account credentials, or sensitive request headers. Capabilities listed in the manifest disclose the plugin's intended behavior; they are not per-capability authorization gates. The current interface starts with verified curated sources and can later accept arbitrary public HTTPS RSS/Atom URLs directly.
 
 ## Acknowledgements / 致谢
 

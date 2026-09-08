@@ -575,6 +575,7 @@ const plugin: EdgeEverPlugin = {
     const disposePanel = context.ui.panels.register({
       id: "reader",
       title: "EdgeEver AI RSS",
+      purpose: "dashboard",
       presentation: "fullscreen",
       mount: (container) => new ReaderApp(context).mount(container),
     });

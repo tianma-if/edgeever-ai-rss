@@ -101,6 +101,7 @@ export interface PluginContext {
       register(panel: {
         id: string;
         title: string;
+        purpose: "workflow" | "dashboard" | "preview" | "onboarding";
         presentation?: "dialog" | "fullscreen";
         mount(container: HTMLElement): void | (() => void) | Promise<void | (() => void)>;
       }): () => void;

@@ -10,7 +10,7 @@
 
 - The product concepts are inspired by `joeseesun/qiaomu-ai-rss`, but this project is an independent implementation.
 - Do not copy upstream source code, icons, fonts, feed-directory snapshots, or other assets without first reviewing and satisfying their licenses.
-- Preserve the acknowledgements and non-affiliation statement in `README.md`.
+- Preserve the acknowledgements in both `README.md` and `README.zh-CN.md`.
 
 ## Product and safety
 

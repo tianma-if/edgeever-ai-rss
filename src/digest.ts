@@ -77,6 +77,31 @@ export const recentCategoryArticles = (
 
 const markdownEscape = (value: string): string => value.replace(/([\\`*_{}\[\]()#+.!|>])/g, "\\$1");
 
+const markdownUrl = (value: string): string => value.replace(/</g, "%3C").replace(/>/g, "%3E");
+
+const sourceLinks = (article: Article): string => [
+  `[🔎 详细内容 · ${markdownEscape(article.sourceName)}](<${markdownUrl(article.url)}>)`,
+  ...(article.relatedCoverage ?? []).map((coverage) =>
+    `[佐证 · ${markdownEscape(coverage.sourceName)}](<${markdownUrl(coverage.url)}>)`,
+  ),
+].join(" · ");
+
+export const renderDigestBody = (markdown: string, articles: Article[]): string => {
+  const withImages = markdown.replace(
+    /(^## 热点(?:[一二三四五六七八九]|十)[^\S\r\n]*$)([\s\S]*?)(?=^## 热点(?:[一二三四五六七八九]|十)[^\S\r\n]*$|(?![\s\S]))/gm,
+    (section: string, heading: string) => {
+      const citation = section.match(/〔(\d+)〕/);
+      const article = citation ? articles[Number(citation[1]) - 1] : undefined;
+      if (!article?.imageUrl) return section;
+      return section.replace(heading, `${heading}\n\n![${markdownEscape(article.title)}](<${markdownUrl(article.imageUrl)}>)`);
+    },
+  );
+  return withImages.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {
+    const article = articles[Number(rawIndex) - 1];
+    return article ? sourceLinks(article) : citation;
+  });
+};
+
 export const digestArticlePayload = (articles: Article[]) => articles.map((article, index) => ({
   index: index + 1,
   title: article.title,
@@ -100,18 +125,9 @@ export const buildDigestMarkdown = (input: {
   windowHours?: number;
 }): string => {
   const generatedAt = input.generatedAt.toISOString();
-  const sources = input.articles.map((article, index) => {
-    const publishedAt = article.publishedAt ? ` · ${article.publishedAt}` : "";
-    const related = article.relatedCoverage?.map((coverage) =>
-      `   - 同一事件：[${markdownEscape(coverage.title)}](<${coverage.url}>) — ${markdownEscape(coverage.sourceName)}${coverage.publishedAt ? ` · ${coverage.publishedAt}` : ""}`,
-    ) ?? [];
-    return [`${index + 1}. [${markdownEscape(article.title)}](<${article.url}>) — ${markdownEscape(article.sourceName)}${publishedAt}`, ...related].join("\n");
-  });
   return [
     `# ${markdownEscape(input.title)}`,
     `> 分类：${markdownEscape(input.category.name)} · 最近 ${input.windowHours ?? 24} 小时 · ${input.articles.length} 篇 · 生成于 ${generatedAt}`,
-    input.aiMarkdown.trim(),
-    "## 来源",
-    ...sources,
+    renderDigestBody(input.aiMarkdown.trim(), input.articles),
   ].join("\n\n");
 };

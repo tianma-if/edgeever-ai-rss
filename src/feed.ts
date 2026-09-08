@@ -13,6 +13,7 @@ export interface Article {
   author: string | null;
   summary: string;
   content: string;
+  imageUrl?: string;
   language: "zh" | "en";
   sourceRole?: FeedSource["digestRole"];
   relatedCoverage?: RelatedCoverage[];
@@ -90,6 +91,69 @@ const validDate = (value: unknown): string | null => {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 };
 
+const mediaUrls = (value: unknown, requireImageType = false): string[] => {
+  const urls: string[] = [];
+  for (const candidate of asArray(value)) {
+    if (typeof candidate === "string") {
+      urls.push(candidate);
+      continue;
+    }
+    if (candidate && typeof candidate === "object") {
+      const record = candidate as Record<string, unknown>;
+      const type = text(record["@_type"] ?? record.type);
+      const medium = text(record["@_medium"] ?? record.medium);
+      if (requireImageType && ((type && !type.startsWith("image/")) || (medium && medium !== "image"))) continue;
+      const url = text(record["@_url"] ?? record["@_href"] ?? record.url ?? record.href);
+      if (url) urls.push(url);
+    }
+  }
+  return urls;
+};
+
+const isPublicHttpsImageUrl = (url: URL): boolean => {
+  if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443")) return false;
+  const hostname = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (!hostname || hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")) return false;
+  const ipv4 = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)?.slice(1).map(Number);
+  if (ipv4 && (
+    ipv4.some((part) => part > 255)
+    || ipv4[0] === 0
+    || ipv4[0] === 10
+    || ipv4[0] === 127
+    || (ipv4[0] === 169 && ipv4[1] === 254)
+    || (ipv4[0] === 172 && ipv4[1]! >= 16 && ipv4[1]! <= 31)
+    || (ipv4[0] === 192 && ipv4[1] === 168)
+    || ipv4[0]! >= 224
+  )) return false;
+  if (hostname === "::1" || hostname.startsWith("fc") || hostname.startsWith("fd") || hostname.startsWith("fe8") || hostname.startsWith("fe9") || hostname.startsWith("fea") || hostname.startsWith("feb")) return false;
+  return true;
+};
+
+const articleImageUrl = (item: Record<string, unknown>, rawContent: unknown, articleUrl: string): string | undefined => {
+  const enclosure = item.enclosure && typeof item.enclosure === "object"
+    ? item.enclosure as Record<string, unknown>
+    : null;
+  const enclosureType = enclosure ? text(enclosure["@_type"] ?? enclosure.type) : "";
+  const html = text(rawContent);
+  const htmlImage = html.match(/<img\b[^>]*?\bsrc\s*=\s*["']([^"']+)["']/i)?.[1] ?? "";
+  const candidates = [
+    ...mediaUrls(item["media:content"], true),
+    ...mediaUrls(item["media:thumbnail"]),
+    ...(enclosureType.startsWith("image/") ? mediaUrls(enclosure) : []),
+    htmlImage,
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      const url = new URL(candidate.replace(/&amp;/gi, "&"), articleUrl);
+      if (isPublicHttpsImageUrl(url)) return url.toString();
+    } catch {
+      // Ignore malformed or non-public image references from untrusted feed data.
+    }
+  }
+  return undefined;
+};
+
 const normalizeItem = (item: Record<string, unknown>, source: FeedSource, atom: boolean): Article | null => {
   const title = plainText(item.title) || "Untitled";
   const url = atom ? atomLink(item.link) : text(item.link) || atomLink(item.link);
@@ -108,6 +172,7 @@ const normalizeItem = (item: Record<string, unknown>, source: FeedSource, atom: 
     author: plainText(item.author ?? item["dc:creator"] ?? item.creator) || null,
     summary,
     content,
+    imageUrl: articleImageUrl(item, rawContent, url),
     language: source.language,
     sourceRole: source.digestRole,
   };

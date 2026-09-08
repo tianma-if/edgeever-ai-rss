@@ -6,6 +6,7 @@ import {
   digestDateKey,
   digestTags,
   digestTitle,
+  renderDigestBody,
   recentCategoryArticles,
 } from "../src/digest";
 import type { Article } from "../src/feed";
@@ -85,14 +86,41 @@ describe("category digest", () => {
       title: "2026-09-08 · AI 前沿 · RSS 日报",
       category,
       generatedAt: new Date("2026-09-08T12:00:00.000Z"),
-      articles: [article()],
-      aiMarkdown: "## 今日概览\n\n重要更新〔1〕",
+      articles: [article({ imageUrl: "https://cdn.example.com/cover.jpg" })],
+      aiMarkdown: "## 热点一\n\n**重要更新**\n\n- 要点〔1〕\n\n## 热点二\n\n暂无更多独立热点\n\n## 热点三\n\n暂无更多独立热点\n\n## 热点四\n\n暂无更多独立热点",
       windowHours: 48,
     });
     expect(markdown).toContain("# 2026-09-08 · AI 前沿 · RSS 日报");
-    expect(markdown).toContain("## 来源");
+    expect(markdown).toContain("## 热点一");
+    expect(markdown).not.toContain("## 来源");
     expect(markdown).toContain("最近 48 小时");
-    expect(markdown).toContain("[A useful \\[update\\]](<https://example.com/update>)");
+    expect(markdown).toContain("![A useful \\[update\\]](<https://cdn.example.com/cover.jpg>)");
+    expect(markdown).toContain("[🔎 详细内容 · OpenAI News](<https://example.com/update>)");
+  });
+
+  test("renders valid citations with corroborating sources and leaves invalid ones unchanged", () => {
+    const markdown = renderDigestBody("## 热点一\n\n热点〔1〕，无效〔2〕。", [article({
+      sourceName: "Source [one]",
+      url: "https://example.com/a>b",
+      relatedCoverage: [{
+        articleId: "related",
+        sourceId: "related-source",
+        sourceName: "Related",
+        title: "Related story",
+        url: "https://related.example.com/story",
+        publishedAt: null,
+      }],
+    })]);
+    expect(markdown).toContain("[🔎 详细内容 · Source \\[one\\]](<https://example.com/a%3Eb>)");
+    expect(markdown).toContain("[佐证 · Related](<https://related.example.com/story>)");
+    expect(markdown).toContain("无效〔2〕");
+  });
+
+  test("adds an available image to hotspot sections through hotspot ten", () => {
+    const markdown = renderDigestBody("## 热点十\n\n**第十个热点**\n\n〔1〕", [article({
+      imageUrl: "https://cdn.example.com/ten.jpg",
+    })]);
+    expect(markdown).toContain("## 热点十\n\n![A useful \\[update\\]](<https://cdn.example.com/ten.jpg>)");
   });
 
   test("includes translated summaries in the AI payload", () => {

@@ -53,6 +53,17 @@
   gap: 8px;
 }
 
+.ear-digest-action {
+  display: grid;
+  gap: 3px;
+}
+
+.ear-cost-hint {
+  color: var(--color-text-muted, #617068);
+  font-size: 10px;
+  text-align: center;
+}
+
 .ear-button,
 .ear-link {
   min-height: 38px;

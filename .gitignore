@@ -1,5 +1,5 @@
 node_modules/
-main.js
-styles.css
+/main.js
+/styles.css
 *.tgz
 .DS_Store

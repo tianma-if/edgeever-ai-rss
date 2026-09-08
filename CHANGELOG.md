@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.3 — 2026-09-09
+
+- 日报热点改用“编号 + 事件概括”作为标题，不再显示“热点一”“热点二”等泛化标题，也不在标题下重复热点名称。
+- Use a numbered story summary as each digest heading instead of generic labels such as “Hotspot One,” without repeating the story name below the heading.
+- 移除日报配图及相关订阅图片提取逻辑，保留每个热点的简短要点、原文链接与佐证信源。
+- Remove digest artwork and feed-image extraction while retaining concise bullet points, original-story links, and corroborating sources for each hotspot.
+
 ## 0.5.2 — 2026-09-09
 
 - 将每篇日报重构为 7 至 10 个独立热点，每个热点包含具体名称、简短要点，以及直接指向原文和同事件佐证报道的信源链接；候选不足时不重复或虚构内容。

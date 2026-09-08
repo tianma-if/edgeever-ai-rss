@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "org.edgeever.plugins.ai-rss",
   "name": "EdgeEver AI RSS",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "apiVersion": "2",
   "settingsUi": "host",
   "description": "AI-generated daily digests from curated RSS and Atom feeds, saved directly to EdgeEver notes.",

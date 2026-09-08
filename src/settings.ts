@@ -1,5 +1,7 @@
 import { CATEGORIES, DEFAULT_CATEGORY_IDS } from "./catalog";
 import type { PluginContext, PluginSettingValue } from "./edgeever";
+import { isTranslationTarget } from "./translation";
+import type { TranslationTarget } from "./translation";
 
 export const SETTINGS_MIGRATION_KEY = "settings-schema-v1-migrated";
 export const categorySettingKey = (categoryId: string): string => `topics.${categoryId}`;
@@ -8,6 +10,8 @@ export const DIGEST_MAX_ARTICLES_KEY = "digest.max-articles";
 export const AUTO_REFRESH_KEY = "reader.auto-refresh";
 export const AUTO_DIGEST_KEY = "digest.auto-enabled";
 export const DIGEST_GENERATION_TIME_KEY = "digest.generation-time";
+export const AUTO_TRANSLATE_KEY = "translation.auto-enabled";
+export const TRANSLATION_TARGET_KEY = "translation.target-language";
 
 export interface ReaderPreferences {
   selectedCategoryIds: string[];
@@ -16,6 +20,8 @@ export interface ReaderPreferences {
   autoRefresh: boolean;
   autoDigest: boolean;
   digestGenerationTime: string;
+  autoTranslate: boolean;
+  translationTarget: TranslationTarget;
 }
 
 const boundedNumber = (value: PluginSettingValue | null, fallback: number, min: number, max: number): number =>
@@ -29,6 +35,8 @@ export const resolveReaderPreferences = (values: Record<string, PluginSettingVal
   digestMaxArticles: boundedNumber(values[DIGEST_MAX_ARTICLES_KEY], 20, 1, 40),
   autoRefresh: values[AUTO_REFRESH_KEY] !== false,
   autoDigest: values[AUTO_DIGEST_KEY] === true,
+  autoTranslate: values[AUTO_TRANSLATE_KEY] !== false,
+  translationTarget: isTranslationTarget(values[TRANSLATION_TARGET_KEY]) ? values[TRANSLATION_TARGET_KEY] : "zh-CN",
   digestGenerationTime: typeof values[DIGEST_GENERATION_TIME_KEY] === "string" && /^(?:[01]\d|2[0-3]):00$/.test(values[DIGEST_GENERATION_TIME_KEY])
     ? values[DIGEST_GENERATION_TIME_KEY]
     : "08:00",
@@ -42,6 +50,8 @@ export const loadReaderPreferences = async (context: PluginContext): Promise<Rea
     AUTO_REFRESH_KEY,
     AUTO_DIGEST_KEY,
     DIGEST_GENERATION_TIME_KEY,
+    AUTO_TRANSLATE_KEY,
+    TRANSLATION_TARGET_KEY,
   ];
   const entries = await Promise.all(keys.map(async (key) => [key, await context.settings.get(key)] as const));
   return resolveReaderPreferences(Object.fromEntries(entries));

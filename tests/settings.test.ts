@@ -9,6 +9,8 @@ describe("reader settings", () => {
       "digest.window-hours": 999,
       "digest.max-articles": 0,
       "reader.auto-refresh": false,
+      "translation.auto-enabled": false,
+      "translation.target-language": "ja",
       "digest.auto-enabled": true,
       "digest.generation-time": "21:00",
     });
@@ -16,6 +18,8 @@ describe("reader settings", () => {
     expect(preferences.digestWindowHours).toBe(168);
     expect(preferences.digestMaxArticles).toBe(1);
     expect(preferences.autoRefresh).toBe(false);
+    expect(preferences.autoTranslate).toBe(false);
+    expect(preferences.translationTarget).toBe("ja");
     expect(preferences.autoDigest).toBe(true);
     expect(preferences.digestGenerationTime).toBe("21:00");
     expect(digestCronExpression(preferences.digestGenerationTime)).toBe("0 21 * * *");
@@ -27,6 +31,8 @@ describe("reader settings", () => {
     expect(preferences.digestWindowHours).toBe(24);
     expect(preferences.digestMaxArticles).toBe(20);
     expect(preferences.autoRefresh).toBe(true);
+    expect(preferences.autoTranslate).toBe(true);
+    expect(preferences.translationTarget).toBe("zh-CN");
     expect(preferences.autoDigest).toBe(false);
     expect(preferences.digestGenerationTime).toBe("08:00");
   });

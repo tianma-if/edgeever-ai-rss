@@ -18,22 +18,5 @@
     "ui:commands",
     "ui:notices",
     "ui:panels"
-  ],
-  "networkHosts": [
-    "openai.com",
-    "blog.google",
-    "huggingface.co",
-    "github.blog",
-    "blog.cloudflare.com",
-    "sspai.com",
-    "blog.yitianshijie.net",
-    "www.nasa.gov",
-    "www.quantamagazine.org",
-    "www.smashingmagazine.com",
-    "alistapart.com",
-    "www.ycombinator.com",
-    "stripe.com",
-    "krebsonsecurity.com",
-    "projectzero.google"
   ]
 }

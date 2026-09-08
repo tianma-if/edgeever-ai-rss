@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2 — 2026-09-09
+
+- 将每篇日报重构为 7 至 10 个独立热点，每个热点包含具体名称、简短要点，以及直接指向原文和同事件佐证报道的信源链接；候选不足时不重复或虚构内容。
+- Restructure each digest into 7–10 independent hotspots with a specific title, concise bullet points, and direct links to the original source and corroborating coverage; never repeat or invent stories when fewer candidates are available.
+- 从 RSS/Atom 媒体字段或正文首图中提取公开 HTTPS 配图并展示在对应热点中，同时拒绝不安全协议与本地网络地址。
+- Extract public HTTPS artwork from RSS/Atom media fields or the first article image and display it with the corresponding hotspot while rejecting unsafe protocols and local-network addresses.
+
 ## 0.5.1 — 2026-09-08
 
 - 精简宿主设置页文案，移除重复说明文字，并将 Token 消耗和设备时区提示直接并入字段标题。

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-09-08
 
 - Adopt EdgeEver plugin API v2, including the mandatory host-rendered settings policy and explicit dashboard panel purpose.
 - 使用 EdgeEver 官方声明式插件设置页统一管理主题、刷新与日报参数，并迁移已有主题选择。

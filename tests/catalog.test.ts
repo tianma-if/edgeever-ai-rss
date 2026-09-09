@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { CATEGORIES, FEEDS } from "../src/catalog";
+import { CATEGORIES, FEEDS, topicSourceList } from "../src/catalog";
 
 interface ManifestSettingField {
   key: string;
   description?: string;
+  list?: ReturnType<typeof topicSourceList>;
 }
 
 interface PluginManifest {
@@ -35,15 +36,12 @@ describe("feed catalog", () => {
     }
   });
 
-  test("discloses every bundled source on its topic setting", () => {
+  test("discloses every bundled source on its topic setting list", () => {
     const fields = manifest.settings?.fields ?? [];
     for (const category of CATEGORIES) {
-      const description = fields.find((field) => field.key === `topics.${category.id}`)?.description;
-      expect(description).toBeString();
-      for (const feed of FEEDS.filter((candidate) => candidate.categoryId === category.id)) {
-        expect(description).toContain(feed.name);
-        expect(description).toContain(new URL(feed.siteUrl).hostname.replace(/^www\./, ""));
-      }
+      const field = fields.find((candidate) => candidate.key === `topics.${category.id}`);
+      expect(field?.description).toBeUndefined();
+      expect(field?.list).toEqual(topicSourceList(category.id));
     }
   });
 });

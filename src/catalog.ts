@@ -62,3 +62,19 @@ export const FEEDS: FeedSource[] = [
 ];
 
 export const DEFAULT_CATEGORY_IDS = CATEGORIES.filter((category) => category.defaultEnabled).map((category) => category.id);
+
+export const feedSiteHost = (siteUrl: string): string =>
+  new URL(siteUrl).hostname.replace(/^www\./, "");
+
+export const topicSourceList = (categoryId: string) => {
+  const category = CATEGORIES.find((candidate) => candidate.id === categoryId);
+  if (!category) throw new Error(`Unknown feed category: ${categoryId}`);
+  return {
+    title: `${category.name}信源`,
+    actionLabel: "查看信源",
+    items: FEEDS.filter((feed) => feed.categoryId === category.id).map((feed) => ({
+      title: feed.name,
+      description: feedSiteHost(feed.siteUrl),
+    })),
+  };
+};

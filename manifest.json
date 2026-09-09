@@ -11,13 +11,50 @@
   "platforms": ["web", "desktop"],
   "settings": {
     "fields": [
-      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "description": "信源：OpenAI News（openai.com）、Google AI（blog.google）、Google DeepMind（deepmind.google）、Apple Machine Learning Research（machinelearning.apple.com）、MIT AI News（news.mit.edu）、Hugging Face（huggingface.co）、TLDR AI（tldr.tech）、Ben's Bites（bensbites.com）、Import AI（importai.substack.com）、NLP Newsletter（nlp.elvissaravia.com）、Interconnects（interconnects.ai）、One Useful Thing（oneusefulthing.org）、科学空间（kexue.fm）、ChinAI Newsletter（chinai.substack.com）、Simon Willison's Weblog（simonwillison.net）、Gary Marcus（garymarcus.substack.com）、Dwarkesh Patel（dwarkeshpatel.com）、Latent Space（latent.space）", "default": true },
-      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "description": "信源：GitHub Changelog（github.blog）、Cloudflare Blog（blog.cloudflare.com）", "default": false },
-      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "description": "信源：少数派（sspai.com）、一天世界（blog.yitianshijie.net）", "default": false },
-      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "description": "信源：NASA（nasa.gov）、Quanta Magazine（quantamagazine.org）", "default": false },
-      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "description": "信源：Smashing Magazine（smashingmagazine.com）、A List Apart（alistapart.com）", "default": false },
-      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "description": "信源：Y Combinator（ycombinator.com）、Stripe Blog（stripe.com）", "default": false },
-      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "description": "信源：Krebs on Security（krebsonsecurity.com）、Google Project Zero（projectzero.google）", "default": false },
+      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "default": true, "list": { "title": "AI 前沿信源", "actionLabel": "查看信源", "items": [
+        { "title": "OpenAI News", "description": "openai.com" },
+        { "title": "Google AI", "description": "blog.google" },
+        { "title": "Google DeepMind", "description": "deepmind.google" },
+        { "title": "Apple Machine Learning Research", "description": "machinelearning.apple.com" },
+        { "title": "MIT AI News", "description": "news.mit.edu" },
+        { "title": "Hugging Face", "description": "huggingface.co" },
+        { "title": "TLDR AI", "description": "tldr.tech" },
+        { "title": "Ben's Bites", "description": "bensbites.com" },
+        { "title": "Import AI", "description": "importai.substack.com" },
+        { "title": "NLP Newsletter", "description": "nlp.elvissaravia.com" },
+        { "title": "Interconnects", "description": "interconnects.ai" },
+        { "title": "One Useful Thing", "description": "oneusefulthing.org" },
+        { "title": "科学空间", "description": "kexue.fm" },
+        { "title": "ChinAI Newsletter", "description": "chinai.substack.com" },
+        { "title": "Simon Willison's Weblog", "description": "simonwillison.net" },
+        { "title": "Gary Marcus", "description": "garymarcus.substack.com" },
+        { "title": "Dwarkesh Patel", "description": "dwarkeshpatel.com" },
+        { "title": "Latent Space", "description": "latent.space" }
+      ] } },
+      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "default": false, "list": { "title": "开发与开源信源", "actionLabel": "查看信源", "items": [
+        { "title": "GitHub Changelog", "description": "github.blog" },
+        { "title": "Cloudflare Blog", "description": "blog.cloudflare.com" }
+      ] } },
+      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "default": false, "list": { "title": "中文阅读信源", "actionLabel": "查看信源", "items": [
+        { "title": "少数派", "description": "sspai.com" },
+        { "title": "一天世界", "description": "blog.yitianshijie.net" }
+      ] } },
+      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "default": false, "list": { "title": "科学与研究信源", "actionLabel": "查看信源", "items": [
+        { "title": "NASA", "description": "nasa.gov" },
+        { "title": "Quanta Magazine", "description": "quantamagazine.org" }
+      ] } },
+      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "default": false, "list": { "title": "产品与设计信源", "actionLabel": "查看信源", "items": [
+        { "title": "Smashing Magazine", "description": "smashingmagazine.com" },
+        { "title": "A List Apart", "description": "alistapart.com" }
+      ] } },
+      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "default": false, "list": { "title": "商业与创业信源", "actionLabel": "查看信源", "items": [
+        { "title": "Y Combinator", "description": "ycombinator.com" },
+        { "title": "Stripe Blog", "description": "stripe.com" }
+      ] } },
+      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "default": false, "list": { "title": "安全与隐私信源", "actionLabel": "查看信源", "items": [
+        { "title": "Krebs on Security", "description": "krebsonsecurity.com" },
+        { "title": "Google Project Zero", "description": "projectzero.google" }
+      ] } },
       { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要（需要消耗 Token）", "default": true },
       { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "required": true, "default": "zh-CN", "options": [
         { "value": "zh-CN", "label": "简体中文" },

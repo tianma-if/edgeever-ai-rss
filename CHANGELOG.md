@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.4 — 2026-09-09
+
+- 在设置页的每个主题下公开列出其内置信源名称与站点域名。
+- Disclose the names and site domains of every bundled source beneath its topic on the settings page.
+
 ## 0.5.3 — 2026-09-09
 
 - 日报热点改用“编号 + 事件概括”作为标题，不再显示“热点一”“热点二”等泛化标题，也不在标题下重复热点名称。

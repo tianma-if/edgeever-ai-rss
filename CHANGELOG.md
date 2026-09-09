@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.5 — 2026-09-09
+
+- 设置页每个主题改为「查看信源」小入口，由 EdgeEver 以列表展示内置信源名称与站点域名，不再把信源直接铺在主题卡片上。
+- Replace the in-card source dump with a small “View sources” entry on each topic; EdgeEver now presents bundled source names and site domains as a list.
+
 ## 0.5.4 — 2026-09-09
 
 - 在设置页的每个主题下公开列出其内置信源名称与站点域名。

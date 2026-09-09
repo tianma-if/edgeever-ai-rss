@@ -11,13 +11,13 @@
   "platforms": ["web", "desktop"],
   "settings": {
     "fields": [
-      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "default": true },
-      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "default": false },
-      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "default": false },
-      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "default": false },
-      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "default": false },
-      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "default": false },
-      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "default": false },
+      { "key": "topics.ai", "type": "boolean", "label": "主题 · AI 前沿", "description": "信源：OpenAI News（openai.com）、Google AI（blog.google）、Google DeepMind（deepmind.google）、Apple Machine Learning Research（machinelearning.apple.com）、MIT AI News（news.mit.edu）、Hugging Face（huggingface.co）、TLDR AI（tldr.tech）、Ben's Bites（bensbites.com）、Import AI（importai.substack.com）、NLP Newsletter（nlp.elvissaravia.com）、Interconnects（interconnects.ai）、One Useful Thing（oneusefulthing.org）、科学空间（kexue.fm）、ChinAI Newsletter（chinai.substack.com）、Simon Willison's Weblog（simonwillison.net）、Gary Marcus（garymarcus.substack.com）、Dwarkesh Patel（dwarkeshpatel.com）、Latent Space（latent.space）", "default": true },
+      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "description": "信源：GitHub Changelog（github.blog）、Cloudflare Blog（blog.cloudflare.com）", "default": false },
+      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "description": "信源：少数派（sspai.com）、一天世界（blog.yitianshijie.net）", "default": false },
+      { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "description": "信源：NASA（nasa.gov）、Quanta Magazine（quantamagazine.org）", "default": false },
+      { "key": "topics.design", "type": "boolean", "label": "主题 · 产品与设计", "description": "信源：Smashing Magazine（smashingmagazine.com）、A List Apart（alistapart.com）", "default": false },
+      { "key": "topics.business", "type": "boolean", "label": "主题 · 商业与创业", "description": "信源：Y Combinator（ycombinator.com）、Stripe Blog（stripe.com）", "default": false },
+      { "key": "topics.security", "type": "boolean", "label": "主题 · 安全与隐私", "description": "信源：Krebs on Security（krebsonsecurity.com）、Google Project Zero（projectzero.google）", "default": false },
       { "key": "translation.auto-enabled", "type": "boolean", "label": "自动翻译标题与摘要（需要消耗 Token）", "default": true },
       { "key": "translation.target-language", "type": "select", "label": "翻译目标语言", "required": true, "default": "zh-CN", "options": [
         { "value": "zh-CN", "label": "简体中文" },

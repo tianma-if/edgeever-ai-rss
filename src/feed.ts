@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import type { FeedSource } from "./catalog";
+import { resolveFeedUrls, type FeedSource } from "./catalog";
 import type { PluginContext } from "./edgeever";
 
 export interface Article {
@@ -148,7 +148,20 @@ const readWithRedirects = async (context: PluginContext, initialUrl: string): Pr
 };
 
 export const fetchFeed = async (context: PluginContext, source: FeedSource): Promise<Article[]> => {
-  const response = await readWithRedirects(context, source.url);
-  if (!response.ok) throw new Error(`${source.name} returned HTTP ${response.status}`);
-  return parseFeed(await response.text(), source);
+  const errors: string[] = [];
+  for (const url of resolveFeedUrls(source)) {
+    try {
+      const response = await readWithRedirects(context, url);
+      if (!response.ok) {
+        errors.push(`${url} HTTP ${response.status}`);
+        continue;
+      }
+      const articles = parseFeed(await response.text(), source);
+      if (articles.length) return articles;
+      errors.push(`${url} returned no parseable articles`);
+    } catch (error) {
+      errors.push(`${url} ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  throw new Error(`${source.name} failed: ${errors.join("; ") || "no feed URLs"}`);
 };

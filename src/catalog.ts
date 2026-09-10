@@ -13,6 +13,8 @@ export interface FeedSource {
   siteUrl: string;
   language: "zh" | "en";
   digestRole?: "official" | "briefing" | "research" | "analysis" | "practitioner" | "interview";
+  /** Access path on an RSSHub instance when the publisher has no first-party feed. */
+  rsshubRoute?: string;
 }
 
 export const CATEGORIES: FeedCategory[] = [
@@ -25,8 +27,9 @@ export const CATEGORIES: FeedCategory[] = [
   { id: "security", name: "安全与隐私", description: "漏洞、安全工程与隐私" },
 ];
 
-// AI source candidates were informed by QMReader's MIT-licensed registry, then
-// independently checked for direct HTTPS RSS/Atom access and parser compatibility.
+// Sources are first-party publishers. RSS, Atom, and RSSHub routes are only access
+// methods for the same publisher pages. AI candidates were informed by QMReader's
+// MIT-licensed registry, then checked independently rather than copied wholesale.
 // https://github.com/joeseesun/qmreader/blob/main/lib/sources.js
 export const FEEDS: FeedSource[] = [
   { id: "openai-news", categoryId: "ai", name: "OpenAI News", url: "https://openai.com/news/rss.xml", siteUrl: "https://openai.com/news/", language: "en", digestRole: "official" },
@@ -47,6 +50,29 @@ export const FEEDS: FeedSource[] = [
   { id: "gary-marcus", categoryId: "ai", name: "Gary Marcus", url: "https://garymarcus.substack.com/feed", siteUrl: "https://garymarcus.substack.com", language: "en", digestRole: "practitioner" },
   { id: "dwarkesh", categoryId: "ai", name: "Dwarkesh Patel", url: "https://www.dwarkeshpatel.com/feed", siteUrl: "https://www.dwarkeshpatel.com", language: "en", digestRole: "interview" },
   { id: "latent-space", categoryId: "ai", name: "Latent Space", url: "https://www.latent.space/feed", siteUrl: "https://www.latent.space", language: "en", digestRole: "interview" },
+  { id: "rundown-ai", categoryId: "ai", name: "The Rundown AI", url: "https://rss.beehiiv.com/feeds/2R3C6Bt5wj.xml", siteUrl: "https://www.therundown.ai", language: "en", digestRole: "briefing" },
+  { id: "why-try-ai", categoryId: "ai", name: "Why Try AI", url: "https://www.whytryai.com/feed", siteUrl: "https://www.whytryai.com", language: "en", digestRole: "briefing" },
+  { id: "geoffrey-litt", categoryId: "ai", name: "Geoffrey Litt", url: "https://www.geoffreylitt.com/feed.xml", siteUrl: "https://www.geoffreylitt.com", language: "en", digestRole: "practitioner" },
+  { id: "tyler-folkman", categoryId: "ai", name: "Tyler Folkman", url: "https://tylerfolkman.substack.com/feed", siteUrl: "https://tylerfolkman.substack.com", language: "en", digestRole: "practitioner" },
+  { id: "qiaomu-blog", categoryId: "ai", name: "乔木博客", url: "https://blog.qiaomu.ai/feed.xml", siteUrl: "https://blog.qiaomu.ai", language: "zh", digestRole: "practitioner" },
+  { id: "lex-fridman", categoryId: "ai", name: "Lex Fridman Podcast", url: "https://lexfridman.com/feed/podcast/", siteUrl: "https://lexfridman.com/podcast", language: "en", digestRole: "interview" },
+  { id: "lilian-weng", categoryId: "ai", name: "Lilian Weng", url: "https://lilianweng.github.io/index.xml", siteUrl: "https://lilianweng.github.io", language: "en", digestRole: "research" },
+  { id: "google-research", categoryId: "ai", name: "Google Research", url: "https://research.google/blog/rss/", siteUrl: "https://research.google/blog/", language: "en", digestRole: "research" },
+  { id: "nvidia-ai", categoryId: "ai", name: "NVIDIA AI", url: "https://blogs.nvidia.com/blog/category/generative-ai/feed/", siteUrl: "https://blogs.nvidia.com/blog/category/generative-ai/", language: "en", digestRole: "official" },
+  { id: "meta-ml", categoryId: "ai", name: "Meta Engineering ML", url: "https://engineering.fb.com/category/ml-applications/feed/", siteUrl: "https://engineering.fb.com/category/ml-applications/", language: "en", digestRole: "official" },
+  { id: "microsoft-research", categoryId: "ai", name: "Microsoft Research", url: "https://www.microsoft.com/en-us/research/blog/feed/", siteUrl: "https://www.microsoft.com/en-us/research/blog/", language: "en", digestRole: "research" },
+  { id: "together-ai", categoryId: "ai", name: "Together AI", url: "https://www.together.ai/blog/rss.xml", siteUrl: "https://www.together.ai/blog", language: "en", digestRole: "official" },
+  { id: "the-gradient", categoryId: "ai", name: "The Gradient", url: "https://thegradient.pub/rss/", siteUrl: "https://thegradient.pub/", language: "en", digestRole: "analysis" },
+  { id: "sebastian-raschka", categoryId: "ai", name: "Sebastian Raschka", url: "https://magazine.sebastianraschka.com/feed", siteUrl: "https://magazine.sebastianraschka.com", language: "en", digestRole: "research" },
+  { id: "semianalysis", categoryId: "ai", name: "SemiAnalysis", url: "https://newsletter.semianalysis.com/feed", siteUrl: "https://www.semianalysis.com", language: "en", digestRole: "analysis" },
+  { id: "mit-tech-review-ai", categoryId: "ai", name: "MIT Technology Review AI", url: "https://www.technologyreview.com/topic/artificial-intelligence/feed/", siteUrl: "https://www.technologyreview.com/topic/artificial-intelligence/", language: "en", digestRole: "analysis" },
+  { id: "ars-technica-ai", categoryId: "ai", name: "Ars Technica AI", url: "https://arstechnica.com/ai/feed/", siteUrl: "https://arstechnica.com/ai/", language: "en", digestRole: "briefing" },
+  { id: "the-verge-ai", categoryId: "ai", name: "The Verge AI", url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", siteUrl: "https://www.theverge.com/ai-artificial-intelligence", language: "en", digestRole: "briefing" },
+  { id: "alignment-forum", categoryId: "ai", name: "Alignment Forum", url: "https://www.alignmentforum.org/feed.xml", siteUrl: "https://www.alignmentforum.org/", language: "en", digestRole: "analysis" },
+  { id: "eleutherai", categoryId: "ai", name: "EleutherAI", url: "https://blog.eleuther.ai/index.xml", siteUrl: "https://blog.eleuther.ai/", language: "en", digestRole: "research" },
+  { id: "cursor-blog", categoryId: "ai", name: "Cursor", url: "https://cursor.com/atom.xml", siteUrl: "https://cursor.com", language: "en", digestRole: "practitioner" },
+  { id: "arxiv-cs-ai", categoryId: "ai", name: "arXiv cs.AI", url: "https://rss.arxiv.org/rss/cs.AI", siteUrl: "https://arxiv.org/list/cs.AI/recent", language: "en", digestRole: "research" },
+  { id: "huggingface-papers", categoryId: "ai", name: "Hugging Face Papers", url: "https://rsshub.ktachibana.party/huggingface/daily-papers", siteUrl: "https://huggingface.co/papers", language: "en", digestRole: "research", rsshubRoute: "/huggingface/daily-papers" },
   { id: "github-changelog", categoryId: "engineering", name: "GitHub Changelog", url: "https://github.blog/changelog/feed/", siteUrl: "https://github.blog/changelog/", language: "en" },
   { id: "cloudflare-blog", categoryId: "engineering", name: "Cloudflare Blog", url: "https://blog.cloudflare.com/rss/", siteUrl: "https://blog.cloudflare.com/", language: "en" },
   { id: "sspai", categoryId: "chinese", name: "少数派", url: "https://sspai.com/feed", siteUrl: "https://sspai.com/", language: "zh" },
@@ -65,6 +91,37 @@ export const DEFAULT_CATEGORY_IDS = CATEGORIES.filter((category) => category.def
 
 export const feedSiteHost = (siteUrl: string): string =>
   new URL(siteUrl).hostname.replace(/^www\./, "");
+
+export const RSSHUB_PUBLIC_ORIGINS = [
+  "https://rsshub.ktachibana.party",
+  "https://rsshub.rssforever.com",
+  "https://rsshub.app",
+] as const;
+
+const isRsshubHost = (value: string): boolean => {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    return host === "rsshub.app" || host.startsWith("rsshub.") || host.includes("rsshub");
+  } catch {
+    return false;
+  }
+};
+
+export const resolveFeedUrls = (source: FeedSource): string[] => {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+  const add = (url: string) => {
+    if (!url.startsWith("https://") || seen.has(url)) return;
+    seen.add(url);
+    urls.push(url);
+  };
+  if (!isRsshubHost(source.url)) add(source.url);
+  if (source.rsshubRoute?.startsWith("/")) {
+    for (const origin of RSSHUB_PUBLIC_ORIGINS) add(`${origin}${source.rsshubRoute}`);
+  }
+  add(source.url);
+  return urls;
+};
 
 export const topicSourceList = (categoryId: string) => {
   const category = CATEGORIES.find((candidate) => candidate.id === categoryId);

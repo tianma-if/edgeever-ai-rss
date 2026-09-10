@@ -1,4 +1,4 @@
-import { FEEDS } from "../src/catalog";
+import { FEEDS, resolveFeedUrls } from "../src/catalog";
 import { parseFeed } from "../src/feed";
 
 interface FeedCheck {
@@ -15,14 +15,27 @@ const worker = async (): Promise<void> => {
     const index = cursor++;
     const source = FEEDS[index]!;
     try {
-      const response = await fetch(source.url, {
-        headers: { Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9" },
-        redirect: "follow",
-        signal: AbortSignal.timeout(20_000),
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const articles = parseFeed(await response.text(), source);
-      if (!articles.length) throw new Error("no parseable articles");
+      let articles: ReturnType<typeof parseFeed> = [];
+      const errors: string[] = [];
+      for (const url of resolveFeedUrls(source)) {
+        try {
+          const response = await fetch(url, {
+            headers: { Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9" },
+            redirect: "follow",
+            signal: AbortSignal.timeout(20_000),
+          });
+          if (!response.ok) {
+            errors.push(`${url} HTTP ${response.status}`);
+            continue;
+          }
+          articles = parseFeed(await response.text(), source);
+          if (articles.length) break;
+          errors.push(`${url} no parseable articles`);
+        } catch (error) {
+          errors.push(`${url} ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+      if (!articles.length) throw new Error(errors.join("; ") || "no feed URLs");
       const latest = articles
         .map((article) => article.publishedAt)
         .filter((publishedAt): publishedAt is string => Boolean(publishedAt))

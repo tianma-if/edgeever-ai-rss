@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.6 — 2026-09-09
+
+- 将“AI 前沿”扩充至 41 个一手发布方。有公开 RSS / Atom 的直连；没有一手 feed 的（如 Hugging Face Papers）自动尝试免费公共 RSSHub，用户无需自建实例。
+- Expand the AI topic to 41 first-party publishers. Public RSS and Atom feeds are fetched directly; publishers without a first-party feed, such as Hugging Face Papers, automatically try free public RSSHub instances with no self-hosted setup.
+
 ## 0.5.5 — 2026-09-09
 
 - 设置页每个主题改为「查看信源」小入口，由 EdgeEver 以列表展示内置信源名称与站点域名，不再把信源直接铺在主题卡片上。

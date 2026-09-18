@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.8 — 2026-09-18
+
+- 移除日报中的「今日速览」空话段落，元信息卡片下方直接呈现具体热点，减少首屏视觉冗余并提升信息获取效率。
+- 强化热点编号标题中管道符与中文字符的空格隔离（`## 01 | 热点标题`）。
+- Remove the boilerplate "Today's Briefing" summary block so the digest immediately starts with specific news items below the metadata badge.
+- Ensure proper spacing around the pipe divider in numbered headings (`## 01 | Title`).
+
 ## 0.5.7 — 2026-09-18
 
 - 优化日报排版与视觉层级：移除正文首行冗余的重复大标题，改用精致卡片展示日期与本地生成时间；新增「今日速览」宏观导读；热点改用极简现代的两位数字编号（`## 01 | ...`），并以分割线增强条目呼吸感。

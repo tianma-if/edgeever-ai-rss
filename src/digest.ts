@@ -75,19 +75,28 @@ export const recentCategoryArticles = (
   return balanceDigestArticles(clusterRelatedArticles(recent), limit);
 };
 
+export const formatDigestTime = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 const markdownEscape = (value: string): string => value.replace(/([\\`*_{}\[\]()#+.!|>])/g, "\\$1");
 
 const markdownUrl = (value: string): string => value.replace(/</g, "%3C").replace(/>/g, "%3E");
 
 const sourceLinks = (article: Article): string => [
-  `[🔎 详细内容 · ${markdownEscape(article.sourceName)}](<${markdownUrl(article.url)}>)`,
+  `[${markdownEscape(article.sourceName)}](<${markdownUrl(article.url)}>)`,
   ...(article.relatedCoverage ?? []).map((coverage) =>
     `[佐证 · ${markdownEscape(coverage.sourceName)}](<${markdownUrl(coverage.url)}>)`,
   ),
 ].join(" · ");
 
 export const renderDigestBody = (markdown: string, articles: Article[]): string => {
-  return markdown.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {
+  const normalized = markdown
+    .replace(/(〔\d+〕)\s*(?=〔\d+〕)/g, "$1 · ")
+    .replace(/([。！？；])\s*(?=〔\d+〕)/g, "$1 ");
+  return normalized.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {
     const article = articles[Number(rawIndex) - 1];
     return article ? sourceLinks(article) : citation;
   });
@@ -115,10 +124,11 @@ export const buildDigestMarkdown = (input: {
   aiMarkdown: string;
   windowHours?: number;
 }): string => {
-  const generatedAt = input.generatedAt.toISOString();
+  const dateKey = digestDateKey(input.generatedAt);
+  const time = formatDigestTime(input.generatedAt);
+  const meta = `> 📅 **${dateKey}** ｜ 🏷️ **${markdownEscape(input.category.name)}** ｜ ⏱️ **${input.articles.length} 篇精选**（最近 ${input.windowHours ?? 24} 小时）· ${time} 生成`;
   return [
-    `# ${markdownEscape(input.title)}`,
-    `> 分类：${markdownEscape(input.category.name)} · 最近 ${input.windowHours ?? 24} 小时 · ${input.articles.length} 篇 · 生成于 ${generatedAt}`,
+    meta,
     renderDigestBody(input.aiMarkdown.trim(), input.articles),
   ].join("\n\n");
 };

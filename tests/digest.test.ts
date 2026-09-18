@@ -87,19 +87,21 @@ describe("category digest", () => {
       category,
       generatedAt: new Date("2026-09-08T12:00:00.000Z"),
       articles: [article()],
-      aiMarkdown: "## 1️⃣ 重要更新\n\n- 要点〔1〕",
+      aiMarkdown: "> 💡 **今日速览**：行业重要更新。\n\n---\n\n## 01 | 重要更新\n\n- **核心进展**：要点\n\n> 🔗 **信源**：〔1〕",
       windowHours: 48,
     });
-    expect(markdown).toContain("# 2026-09-08 · AI 前沿 · RSS 日报");
-    expect(markdown).toContain("## 1️⃣ 重要更新");
+    expect(markdown).toContain("2026-09-08");
+    expect(markdown).toContain("AI 前沿");
+    expect(markdown).toContain("## 01 | 重要更新");
+    expect(markdown).not.toContain("# 2026-09-08 · AI 前沿 · RSS 日报");
     expect(markdown).not.toContain("## 热点一");
     expect(markdown).not.toContain("## 来源");
     expect(markdown).toContain("最近 48 小时");
-    expect(markdown).toContain("[🔎 详细内容 · OpenAI News](<https://example.com/update>)");
+    expect(markdown).toContain("[OpenAI News](<https://example.com/update>)");
   });
 
   test("renders valid citations with corroborating sources and leaves invalid ones unchanged", () => {
-    const markdown = renderDigestBody("## 1️⃣ 模型能力升级\n\n热点〔1〕，无效〔2〕。", [article({
+    const markdown = renderDigestBody("## 01 | 模型能力升级\n\n热点〔1〕〔1〕，标点。〔1〕，无效〔2〕。", [article({
       sourceName: "Source [one]",
       url: "https://example.com/a>b",
       relatedCoverage: [{
@@ -111,8 +113,10 @@ describe("category digest", () => {
         publishedAt: null,
       }],
     })]);
-    expect(markdown).toContain("[🔎 详细内容 · Source \\[one\\]](<https://example.com/a%3Eb>)");
+    expect(markdown).toContain("[Source \\[one\\]](<https://example.com/a%3Eb>)");
     expect(markdown).toContain("[佐证 · Related](<https://related.example.com/story>)");
+    expect(markdown).toContain(" · [Source \\[one\\]]");
+    expect(markdown).toContain("标点。 [Source \\[one\\]]");
     expect(markdown).toContain("无效〔2〕");
   });
 

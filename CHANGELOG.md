@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.7 — 2026-09-18
+
+- 优化日报排版与视觉层级：移除正文首行冗余的重复大标题，改用精致卡片展示日期与本地生成时间；新增「今日速览」宏观导读；热点改用极简现代的两位数字编号（`## 01 | ...`），并以分割线增强条目呼吸感。
+- 将信源链接从正文要点末尾解耦为独立的引用行，精简链接文本并修复标点粘连，让正文要点专注于事实与加粗核心结论。
+- Streamline digest layout and visual hierarchy: remove the redundant top heading inside the note body, present friendly metadata and local timestamps, add a concise TL;DR overview, use modern zero-padded numbered headings (`## 01 | ...`), and add horizontal dividers for visual rhythm.
+- Decouple source citations from bullet points into dedicated blockquote rows, simplify link labels, and fix punctuation spacing.
+
 ## 0.5.6 — 2026-09-09
 
 - 将“AI 前沿”扩充至 41 个一手发布方。有公开 RSS / Atom 的直连；没有一手 feed 的（如 Hugging Face Papers）自动尝试免费公共 RSSHub，用户无需自建实例。

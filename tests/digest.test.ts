@@ -87,7 +87,7 @@ describe("category digest", () => {
       category,
       generatedAt: new Date("2026-09-08T12:00:00.000Z"),
       articles: [article()],
-      aiMarkdown: "> 💡 **今日速览**：行业重要更新。\n\n---\n\n## 01 | 重要更新\n\n- **核心进展**：要点\n\n> 🔗 **信源**：〔1〕",
+      aiMarkdown: "## 01 | 重要更新\n\n- **核心进展**：要点\n\n> 🔗 **信源**：〔1〕",
       windowHours: 48,
     });
     expect(markdown).toContain("2026-09-08");
@@ -96,8 +96,14 @@ describe("category digest", () => {
     expect(markdown).not.toContain("# 2026-09-08 · AI 前沿 · RSS 日报");
     expect(markdown).not.toContain("## 热点一");
     expect(markdown).not.toContain("## 来源");
+    expect(markdown).not.toContain("今日速览");
     expect(markdown).toContain("最近 48 小时");
     expect(markdown).toContain("[OpenAI News](<https://example.com/update>)");
+
+    // Also verify any residual 速览 block from older/cached responses is stripped cleanly
+    const cleaned = renderDigestBody("> 💡 **今日速览**：行业重要更新。\n\n---\n\n## 01 | 重要更新", [article()]);
+    expect(cleaned).not.toContain("今日速览");
+    expect(cleaned).toContain("## 01 | 重要更新");
   });
 
   test("renders valid citations with corroborating sources and leaves invalid ones unchanged", () => {

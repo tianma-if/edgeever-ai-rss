@@ -93,7 +93,10 @@ const sourceLinks = (article: Article): string => [
 ].join(" · ");
 
 export const renderDigestBody = (markdown: string, articles: Article[]): string => {
-  const normalized = markdown
+  const stripped = markdown
+    .replace(/^>\s*💡\s*\*\*?今日速览\*?\*?.*?(?:\n\s*---\s*(?:\n|$)|(?=\n\s*##\s*\d+))/s, "")
+    .trimStart();
+  const normalized = stripped
     .replace(/(〔\d+〕)\s*(?=〔\d+〕)/g, "$1 · ")
     .replace(/([。！？；])\s*(?=〔\d+〕)/g, "$1 ");
   return normalized.replace(/〔(\d+)〕/g, (citation, rawIndex: string) => {

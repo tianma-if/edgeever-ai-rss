@@ -6,6 +6,14 @@
   "apiVersion": "2",
   "settingsUi": "host",
   "description": "AI-generated daily digests from curated RSS and Atom feeds, saved directly to EdgeEver notes.",
+  "locales": {
+    "zh-CN": {
+      "description": "根据精选的 RSS 和 Atom 订阅源生成 AI 每日摘要，并直接保存到 EdgeEver 笔记。"
+    },
+    "ja": {
+      "description": "厳選した RSS / Atom フィードから AI が毎日のダイジェストを生成し、EdgeEver のノートに直接保存します。"
+    }
+  },
   "author": "EdgeEver",
   "entry": "./main.js",
   "platforms": ["web", "desktop"],

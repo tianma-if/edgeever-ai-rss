@@ -1,6 +1,6 @@
 {
   "name": "edgeever-ai-rss",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "private": true,
   "type": "module",
   "description": "AI-generated RSS and Atom topic digests for EdgeEver.",

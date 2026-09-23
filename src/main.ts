@@ -4,6 +4,7 @@ import type { EdgeEverPlugin, PluginContext } from "./edgeever";
 import { buildDigestMarkdown, DAILY_DIGEST_TAG, digestArticlePayload, digestDateKey, digestTags, digestTitle, recentCategoryArticles } from "./digest";
 import { fetchFeed } from "./feed";
 import type { Article } from "./feed";
+import { createLatestTaskQueue } from "./latest-task-queue";
 import { AUTO_DIGEST_KEY, DIGEST_GENERATION_TIME_KEY, digestCronExpression, loadReaderPreferences, migrateLegacyCategorySettings } from "./settings";
 import {
   applyHeadlineTranslation,
@@ -200,15 +201,28 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
 const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> => {
   if (!context.schedules) return;
   const preferences = await loadReaderPreferences(context);
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone?.trim() || "UTC";
   await context.schedules.upsert({
     key: DAILY_DIGEST_SCHEDULE_KEY,
     name: `EdgeEver RSS 分类日报（${preferences.digestGenerationTime}）`,
     commandId: DAILY_DIGEST_COMMAND_ID,
     cronExpression: digestCronExpression(preferences.digestGenerationTime),
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone,
     missedRunPolicy: "run-once",
     isEnabled: preferences.autoDigest,
   });
+};
+
+const desktopSchedulesUnavailable = (error: unknown) =>
+  error instanceof Error && error.message.includes("only available in the EdgeEver desktop app");
+
+const syncDailyDigestScheduleWithRetry = async (context: PluginContext): Promise<void> => {
+  try {
+    await syncDailyDigestSchedule(context);
+  } catch (error) {
+    if (desktopSchedulesUnavailable(error)) return;
+    await syncDailyDigestSchedule(context);
+  }
 };
 
 const plugin: EdgeEverPlugin = {
@@ -235,16 +249,24 @@ const plugin: EdgeEverPlugin = {
         }
       },
     });
+    const scheduleSync = createLatestTaskQueue();
+    const enqueueScheduleSync = () => scheduleSync.enqueue(() => syncDailyDigestScheduleWithRetry(context));
     const disposeSettingsChanged = context.events.on("settings.changed", async ({ key }) => {
       if (key !== AUTO_DIGEST_KEY && key !== DIGEST_GENERATION_TIME_KEY) return;
+      const run = enqueueScheduleSync();
       try {
-        await syncDailyDigestSchedule(context);
-      } catch {
-        context.ui.showNotice("设置已保存，但桌面日报计划暂时无法更新；重新启动 EdgeEver 后会重试。");
+        await run;
+      } catch (error) {
+        if (!scheduleSync.isLatest(run) || desktopSchedulesUnavailable(error)) return;
+        console.error("EdgeEver RSS daily digest schedule update failed.", error);
+        const detail = error instanceof Error ? error.message : "未知错误";
+        context.ui.showNotice(`设置已保存，但桌面日报计划没有更新：${detail}`);
       }
     });
     await context.schedules?.remove(LEGACY_DAILY_DIGEST_SCHEDULE_KEY).catch(() => undefined);
-    await syncDailyDigestSchedule(context).catch(() => undefined);
+    await enqueueScheduleSync().catch((error) => {
+      console.error("EdgeEver RSS daily digest schedule update failed.", error);
+    });
     return () => {
       disposeSettingsChanged();
       disposeDigestCommand();

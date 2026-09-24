@@ -13,7 +13,7 @@ export interface FeedSource {
   siteUrl: string;
   language: "zh" | "en";
   digestRole?: "official" | "briefing" | "research" | "analysis" | "practitioner" | "interview";
-  /** Optional featured feeds require an explicit opt-in in host settings. */
+  /** Optional featured feeds require an explicit subscription in the panel. */
   optional?: boolean;
   /** Access path on an RSSHub instance when the publisher has no first-party feed. */
   rsshubRoute?: string;
@@ -21,8 +21,8 @@ export interface FeedSource {
 
 export const CATEGORIES: FeedCategory[] = [
   { id: "ai", name: "AI 前沿", description: "模型、研究、工具与 AI 产品", defaultEnabled: true },
-  { id: "engineering", name: "开发与开源", description: "工程实践、平台更新与开源生态" },
-  { id: "chinese", name: "中文阅读", description: "中文科技、产品与独立写作" },
+  { id: "engineering", name: "开发与开源", description: "工程实践、平台更新与开源生态", defaultEnabled: true },
+  { id: "chinese", name: "中文阅读", description: "中文科技、产品与独立写作", defaultEnabled: true },
   { id: "science", name: "科学与研究", description: "自然科学、数学与航天" },
   { id: "design", name: "产品与设计", description: "产品方法、Web 与交互设计" },
   { id: "business", name: "商业与创业", description: "创业、公司与科技商业" },
@@ -77,10 +77,25 @@ export const FEEDS: FeedSource[] = [
   { id: "huggingface-papers", categoryId: "ai", name: "Hugging Face Papers", url: "https://rsshub.ktachibana.party/huggingface/daily-papers", siteUrl: "https://huggingface.co/papers", language: "en", digestRole: "research", rsshubRoute: "/huggingface/daily-papers" },
   { id: "github-changelog", categoryId: "engineering", name: "GitHub Changelog", url: "https://github.blog/changelog/feed/", siteUrl: "https://github.blog/changelog/", language: "en" },
   { id: "cloudflare-blog", categoryId: "engineering", name: "Cloudflare Blog", url: "https://blog.cloudflare.com/rss/", siteUrl: "https://blog.cloudflare.com/", language: "en" },
+  { id: "python-insider", categoryId: "engineering", name: "Python Insider", url: "https://blog.python.org/rss.xml", siteUrl: "https://blog.python.org/", language: "en" },
+  { id: "rust-blog", categoryId: "engineering", name: "Rust Blog", url: "https://blog.rust-lang.org/feed.xml", siteUrl: "https://blog.rust-lang.org/", language: "en" },
+  { id: "mdn-blog", categoryId: "engineering", name: "MDN Blog", url: "https://developer.mozilla.org/en-US/blog/rss.xml", siteUrl: "https://developer.mozilla.org/en-US/blog/", language: "en" },
+  { id: "web-dev", categoryId: "engineering", name: "web.dev", url: "https://web.dev/static/blog/feed.xml", siteUrl: "https://web.dev/blog", language: "en" },
+  { id: "docker-blog", categoryId: "engineering", name: "Docker Blog", url: "https://www.docker.com/blog/feed/", siteUrl: "https://www.docker.com/blog/", language: "en" },
+  { id: "kubernetes-blog", categoryId: "engineering", name: "Kubernetes Blog", url: "https://kubernetes.io/feed.xml", siteUrl: "https://kubernetes.io/blog/", language: "en" },
+  { id: "gitlab-blog", categoryId: "engineering", name: "GitLab Blog", url: "https://about.gitlab.com/atom.xml", siteUrl: "https://about.gitlab.com/blog/", language: "en" },
+  { id: "martin-fowler", categoryId: "engineering", name: "Martin Fowler", url: "https://martinfowler.com/feed.atom", siteUrl: "https://martinfowler.com/", language: "en" },
   { id: "ruanyifeng", categoryId: "engineering", name: "阮一峰的网络日志", url: "https://www.ruanyifeng.com/blog/atom.xml", siteUrl: "https://www.ruanyifeng.com/blog/", language: "zh", optional: true },
   { id: "codingnow", categoryId: "engineering", name: "云风的 BLOG", url: "https://blog.codingnow.com/atom.xml", siteUrl: "https://blog.codingnow.com/", language: "zh", optional: true },
   { id: "sspai", categoryId: "chinese", name: "少数派", url: "https://sspai.com/feed", siteUrl: "https://sspai.com/", language: "zh" },
   { id: "yitianshijie", categoryId: "chinese", name: "一天世界", url: "https://blog.yitianshijie.net/feed/atom/", siteUrl: "https://blog.yitianshijie.net/", language: "zh" },
+  { id: "python-craftsman", categoryId: "chinese", name: "Python 工匠", url: "https://www.piglei.com/feeds/latest/", siteUrl: "https://www.piglei.com/", language: "zh" },
+  { id: "jimmysong", categoryId: "chinese", name: "云原生", url: "https://jimmysong.io/index.xml", siteUrl: "https://jimmysong.io/", language: "zh" },
+  { id: "phodal", categoryId: "chinese", name: "全栈应用开发", url: "https://www.phodal.com/blog/feeds/rss/", siteUrl: "https://www.phodal.com/", language: "zh" },
+  { id: "devtang", categoryId: "chinese", name: "唐巧的博客", url: "https://blog.devtang.com/atom.xml", siteUrl: "https://blog.devtang.com/", language: "zh" },
+  { id: "jeffjade", categoryId: "chinese", name: "晚晴幽草轩", url: "https://www.jeffjade.com/atom.xml", siteUrl: "https://www.jeffjade.com/", language: "zh" },
+  { id: "lilydjwg", categoryId: "chinese", name: "依云's Blog", url: "https://blog.lilydjwg.me/posts.rss", siteUrl: "https://blog.lilydjwg.me/", language: "zh" },
+  { id: "greatdk", categoryId: "chinese", name: "王登科的博客", url: "https://greatdk.com/feed", siteUrl: "https://greatdk.com/", language: "zh" },
   { id: "tw93-weekly", categoryId: "chinese", name: "潮流周刊", url: "https://weekly.tw93.fun/rss.xml", siteUrl: "https://weekly.tw93.fun/", language: "zh", optional: true },
   { id: "appinn", categoryId: "chinese", name: "小众软件", url: "https://feed.appinn.com/", siteUrl: "https://www.appinn.com/", language: "zh", optional: true },
   { id: "nasa", categoryId: "science", name: "NASA", url: "https://www.nasa.gov/feed/", siteUrl: "https://www.nasa.gov/", language: "en" },

@@ -62,13 +62,28 @@
         { "title": "arXiv cs.AI", "description": "arxiv.org" },
         { "title": "Hugging Face Papers", "description": "huggingface.co" }
       ] } },
-      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "default": false, "list": { "title": "开发与开源信源", "actionLabel": "查看信源", "items": [
+      { "key": "topics.engineering", "type": "boolean", "label": "主题 · 开发与开源", "default": true, "list": { "title": "开发与开源信源", "actionLabel": "查看信源", "items": [
         { "title": "GitHub Changelog", "description": "github.blog" },
-        { "title": "Cloudflare Blog", "description": "blog.cloudflare.com" }
+        { "title": "Cloudflare Blog", "description": "blog.cloudflare.com" },
+        { "title": "Python Insider", "description": "blog.python.org" },
+        { "title": "Rust Blog", "description": "blog.rust-lang.org" },
+        { "title": "MDN Blog", "description": "developer.mozilla.org" },
+        { "title": "web.dev", "description": "web.dev" },
+        { "title": "Docker Blog", "description": "docker.com" },
+        { "title": "Kubernetes Blog", "description": "kubernetes.io" },
+        { "title": "GitLab Blog", "description": "about.gitlab.com" },
+        { "title": "Martin Fowler", "description": "martinfowler.com" }
       ] } },
-      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "default": false, "list": { "title": "中文阅读信源", "actionLabel": "查看信源", "items": [
+      { "key": "topics.chinese", "type": "boolean", "label": "主题 · 中文阅读", "default": true, "list": { "title": "中文阅读信源", "actionLabel": "查看信源", "items": [
         { "title": "少数派", "description": "sspai.com" },
-        { "title": "一天世界", "description": "blog.yitianshijie.net" }
+        { "title": "一天世界", "description": "blog.yitianshijie.net" },
+        { "title": "Python 工匠", "description": "piglei.com" },
+        { "title": "云原生", "description": "jimmysong.io" },
+        { "title": "全栈应用开发", "description": "phodal.com" },
+        { "title": "唐巧的博客", "description": "blog.devtang.com" },
+        { "title": "晚晴幽草轩", "description": "jeffjade.com" },
+        { "title": "依云's Blog", "description": "blog.lilydjwg.me" },
+        { "title": "王登科的博客", "description": "greatdk.com" }
       ] } },
       { "key": "topics.science", "type": "boolean", "label": "主题 · 科学与研究", "default": false, "list": { "title": "科学与研究信源", "actionLabel": "查看信源", "items": [
         { "title": "NASA", "description": "nasa.gov" },

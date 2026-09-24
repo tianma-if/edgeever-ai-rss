@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { CATEGORIES, FEEDS, RSSHUB_PUBLIC_ORIGINS, resolveFeedUrls, topicSourceList } from "../src/catalog";
+import { CATEGORIES, DEFAULT_CATEGORY_IDS, FEEDS, RSSHUB_PUBLIC_ORIGINS, resolveFeedUrls, topicSourceList } from "../src/catalog";
+import { selectSources } from "../src/subscriptions";
 
 interface ManifestSettingField {
   key: string;
   description?: string;
+  default?: boolean;
   list?: ReturnType<typeof topicSourceList>;
 }
 
@@ -14,6 +16,19 @@ interface PluginManifest {
 const manifest = await Bun.file(new URL("../manifest.json", import.meta.url)).json() as PluginManifest;
 
 describe("feed catalog", () => {
+  test("starts new installs with exactly 60 feeds across three topics", () => {
+    expect(DEFAULT_CATEGORY_IDS).toEqual(["ai", "engineering", "chinese"]);
+    const sources = selectSources(DEFAULT_CATEGORY_IDS, { featuredIds: [], personal: [] });
+    expect(sources.length).toBe(60);
+    expect(sources.filter((source) => source.categoryId === "ai").length).toBe(41);
+    expect(sources.filter((source) => source.categoryId === "engineering").length).toBe(10);
+    expect(sources.filter((source) => source.categoryId === "chinese").length).toBe(9);
+    expect(sources.every((source) => !source.optional)).toBe(true);
+    for (const category of CATEGORIES) {
+      expect(manifest.settings?.fields?.find((field) => field.key === `topics.${category.id}`)?.default).toBe(category.defaultEnabled === true);
+    }
+  });
+
   test("keeps identifiers and feed URLs unique", () => {
     expect(new Set(FEEDS.map((feed) => feed.id)).size).toBe(FEEDS.length);
     expect(new Set(FEEDS.map((feed) => feed.url)).size).toBe(FEEDS.length);

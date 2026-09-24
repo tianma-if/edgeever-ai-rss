@@ -133,4 +133,24 @@ describe("category digest", () => {
       excerpt: "Original body",
     });
   });
+
+  test("keeps a full digest request within the host AI prompt limit", () => {
+    const articles = Array.from({ length: 20 }, (_, index) => article({
+      id: `oversized-${index}`,
+      title: "题".repeat(2_000),
+      sourceName: "源".repeat(500),
+      summary: "摘要".repeat(1_000),
+      content: "正文".repeat(25_000),
+      relatedCoverage: Array.from({ length: 20 }, (_, coverageIndex) => ({
+        articleId: `${index}-${coverageIndex}`,
+        sourceId: "other",
+        sourceName: "源".repeat(500),
+        title: "标题".repeat(1_000),
+        url: "https://example.com/related",
+        publishedAt: null,
+      })),
+    }));
+    const prompt = JSON.stringify({ category: "AI 前沿", articles: digestArticlePayload(articles) });
+    expect(prompt.length).toBeLessThan(90_000);
+  });
 });

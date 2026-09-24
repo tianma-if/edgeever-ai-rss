@@ -105,7 +105,7 @@ const translateHeadlines = async (
           title: article.title,
           summary: article.summary.slice(0, 800),
         }))),
-        maxOutputTokens: 7_000,
+        maxOutputTokens: 5_000,
       });
       for (const [articleId, translation] of parseHeadlineTranslations(result.text, batch, target)) {
         state.aiReadings[articleId] = { ...state.aiReadings[articleId], headlineTranslation: translation };
@@ -120,11 +120,17 @@ interface DigestJobResult {
   created: number;
   updated: number;
   failed: number;
+  failureDetails: string[];
   skipped: number;
   sourceFailures: number;
 }
 
-const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobResult> => {
+const failureMessage = (error: unknown): string => {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.replace(/\s+/g, " ").slice(0, 240) || "未知错误";
+};
+
+export const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobResult> => {
   const stored = await context.storage.get<ReaderState>(STATE_KEY);
   let state = stored ? { ...initialState(), ...stored } : initialState();
   const notebooks = await context.notebooks.list();
@@ -158,8 +164,10 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
   let created = 0;
   let updated = 0;
   let failed = 0;
+  const failureDetails: string[] = [];
 
   for (const item of pending) {
+    let stage = "AI 生成";
     try {
       const title = digestTitle(dateKey, item.category.name);
       const ai = await context.ai.generate({
@@ -179,6 +187,7 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
       });
       const tags = digestTags(dateKey, item.category.id);
       const contentMarkdown = buildDigestMarkdown({ title, category: item.category, generatedAt, articles: item.articles, aiMarkdown: ai.text, windowHours: preferences.digestWindowHours });
+      stage = "查找已有笔记";
       const matches = await context.notes.query({
         notebookId,
         tags: [DAILY_DIGEST_TAG, `AI-RSS-Category-${item.category.id}`, `AI-RSS-Date-${dateKey}`],
@@ -186,6 +195,7 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
         limit: 10,
       });
       const existing = matches.notes[0];
+      stage = existing ? "更新笔记" : "保存笔记";
       if (existing) {
         await context.notes.update(existing.id, { title, contentMarkdown, tags });
         updated += 1;
@@ -193,12 +203,15 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
         await context.notes.create({ notebookId, title, contentMarkdown, tags });
         created += 1;
       }
-    } catch {
+    } catch (error) {
       failed += 1;
+      const detail = `${item.category.name} · ${stage}：${failureMessage(error)}`;
+      failureDetails.push(detail);
+      console.error("EdgeEver RSS category digest failed.", { category: item.category.id, stage, error });
     }
   }
 
-  return { created, updated, failed, skipped: categories.length - pending.length, sourceFailures };
+  return { created, updated, failed, failureDetails, skipped: categories.length - pending.length, sourceFailures };
 };
 
 const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> => {
@@ -241,8 +254,10 @@ const plugin: EdgeEverPlugin = {
       run: async () => {
         try {
           const result = await runCategoryDigestJob(context);
-          if (result.failed > 0 && result.created + result.updated === 0) throw new Error(`${result.failed} 个分类日报全部生成失败。`);
-          const failureText = result.failed ? `，${result.failed} 个失败` : "";
+          if (result.failed > 0 && result.created + result.updated === 0) {
+            throw new Error(`${result.failed} 个分类日报全部生成失败。${result.failureDetails.join("；")}`);
+          }
+          const failureText = result.failed ? `，${result.failed} 个失败：${result.failureDetails.join("；")}` : "";
           const skippedText = result.skipped ? `，跳过 ${result.skipped} 个空分类` : "";
           const sourceFailureText = result.sourceFailures ? `，${result.sourceFailures} 个订阅源读取失败` : "";
           context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${skippedText}${failureText}${sourceFailureText}。`);

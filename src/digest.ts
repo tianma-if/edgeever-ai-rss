@@ -107,14 +107,14 @@ export const renderDigestBody = (markdown: string, articles: Article[]): string 
 
 export const digestArticlePayload = (articles: Article[]) => articles.map((article, index) => ({
   index: index + 1,
-  title: article.title,
-  source: article.sourceName,
+  title: article.title.slice(0, 300),
+  source: article.sourceName.slice(0, 100),
   publishedAt: article.publishedAt,
-  summary: article.summary.slice(0, 800),
-  excerpt: (article.content || article.summary).slice(0, 3_000),
-  relatedCoverage: article.relatedCoverage?.map((coverage) => ({
-    source: coverage.sourceName,
-    title: coverage.title,
+  summary: article.summary.slice(0, 500),
+  excerpt: (article.content || article.summary).slice(0, 1_600),
+  relatedCoverage: article.relatedCoverage?.slice(0, 3).map((coverage) => ({
+    source: coverage.sourceName.slice(0, 100),
+    title: coverage.title.slice(0, 180),
     publishedAt: coverage.publishedAt,
   })),
 }));

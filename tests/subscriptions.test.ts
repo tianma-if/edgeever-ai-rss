@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { cleanSubscriptions, createPersonalSource, normalizePublicFeedUrl, selectSources } from "../src/subscriptions";
 import { parseCommunityDirectory } from "../src/discovery";
+import { COMMUNITY_DIRECTORY } from "../src/community-directory";
 
 describe("subscription selection", () => {
   test("adds only opted-in featured sources in enabled topics", () => {
@@ -34,5 +35,11 @@ describe("subscription selection", () => {
   test("filters the community OPML to unique public HTTPS sources", () => {
     const xml = '<opml><body><outline title="A" xmlUrl="https://a.example/feed" htmlUrl="https://a.example"/><outline title="B" xmlUrl="http://b.example/feed"/><outline title="A2" xmlUrl="https://a.example/feed"/></body></opml>';
     expect(parseCommunityDirectory(xml)).toEqual([{ name: "A", url: "https://a.example/feed", siteUrl: "https://a.example/" }]);
+  });
+
+  test("bundles an offline, deduplicated directory of public feeds", () => {
+    expect(COMMUNITY_DIRECTORY.length).toBeGreaterThanOrEqual(600);
+    expect(new Set(COMMUNITY_DIRECTORY.map((source) => source.url)).size).toBe(COMMUNITY_DIRECTORY.length);
+    expect(COMMUNITY_DIRECTORY.every((source) => normalizePublicFeedUrl(source.url) === source.url)).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
-import { CATEGORIES, FEEDS, type FeedSource } from "./catalog";
+import { CATEGORIES, FEEDS } from "./catalog";
+import { COMMUNITY_DIRECTORY } from "./community-directory";
 import { fetchCommunityDirectory, type DirectorySource } from "./discovery";
 import type { PluginContext } from "./edgeever";
 import { fetchFeed } from "./feed";
@@ -36,7 +37,7 @@ export const registerSubscriptionPanel = (context: PluginContext): (() => void) 
       let busy = false;
       let message = "";
       let subscriptions: Subscriptions = await loadSubscriptions(context);
-      let directory: DirectorySource[] | null = null;
+      let directory: DirectorySource[] = COMMUNITY_DIRECTORY;
       let directoryLoading = false;
       let customUrl = "";
       let customName = "";
@@ -59,7 +60,6 @@ export const registerSubscriptionPanel = (context: PluginContext): (() => void) 
             query = "";
             shown = 50;
             message = "";
-            if (tab === "community") void loadDirectory();
           } else if (key === "query") {
             query = value;
             shown = 50;
@@ -84,7 +84,7 @@ export const registerSubscriptionPanel = (context: PluginContext): (() => void) 
       };
 
       const loadDirectory = async () => {
-        if (directory || directoryLoading) return;
+        if (directoryLoading) return;
         directoryLoading = true;
         render();
         try {
@@ -154,12 +154,8 @@ export const registerSubscriptionPanel = (context: PluginContext): (() => void) 
       };
 
       const renderCommunity = (root: HTMLElement) => {
-        root.append(element("p", "edgeever-rss-muted", "目录按需从 timqian/chinese-independent-blogs 获取（MIT）；订阅时只验证所选源。目录中的旧地址可能失效。"));
-        if (!directory) {
-          root.append(element("p", "edgeever-rss-muted", directoryLoading ? "正在读取目录…" : "目录未载入。"));
-          if (!directoryLoading) root.append(button("重新读取目录", () => void loadDirectory()));
-          return;
-        }
+        root.append(element("p", "edgeever-rss-muted", `内置 ${COMMUNITY_DIRECTORY.length} 个公开 HTTPS 博客源，可离线搜索。目录来源：timqian/chinese-independent-blogs（MIT）；旧地址可能失效，订阅时只验证所选源。`));
+        root.append(button(directoryLoading ? "正在更新…" : "更新目录", () => void loadDirectory(), directoryLoading));
         const feeds = directory.filter((source) => matches(source.name, source.url));
         root.append(element("p", "edgeever-rss-muted", `匹配 ${feeds.length} 个，当前显示 ${Math.min(shown, feeds.length)} 个。`));
         for (const source of feeds.slice(0, shown)) {

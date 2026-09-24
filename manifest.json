@@ -57,7 +57,7 @@
         { "title": "Ars Technica AI", "description": "arstechnica.com" },
         { "title": "The Verge AI", "description": "theverge.com" },
         { "title": "Alignment Forum", "description": "alignmentforum.org" },
-        { "title": "EleutherAI", "description": "blog.eleuther.ai" },
+        { "title": "Ollama Blog", "description": "ollama.com" },
         { "title": "Cursor", "description": "cursor.com" },
         { "title": "arXiv cs.AI", "description": "arxiv.org" },
         { "title": "Hugging Face Papers", "description": "huggingface.co" }
@@ -135,6 +135,7 @@
     "schedules",
     "metadata:read",
     "ui:commands",
+    "ui:panels",
     "ui:notices"
   ]
 }

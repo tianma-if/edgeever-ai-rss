@@ -13,6 +13,8 @@ export interface FeedSource {
   siteUrl: string;
   language: "zh" | "en";
   digestRole?: "official" | "briefing" | "research" | "analysis" | "practitioner" | "interview";
+  /** Optional featured feeds require an explicit opt-in in host settings. */
+  optional?: boolean;
   /** Access path on an RSSHub instance when the publisher has no first-party feed. */
   rsshubRoute?: string;
 }
@@ -69,18 +71,23 @@ export const FEEDS: FeedSource[] = [
   { id: "ars-technica-ai", categoryId: "ai", name: "Ars Technica AI", url: "https://arstechnica.com/ai/feed/", siteUrl: "https://arstechnica.com/ai/", language: "en", digestRole: "briefing" },
   { id: "the-verge-ai", categoryId: "ai", name: "The Verge AI", url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", siteUrl: "https://www.theverge.com/ai-artificial-intelligence", language: "en", digestRole: "briefing" },
   { id: "alignment-forum", categoryId: "ai", name: "Alignment Forum", url: "https://www.alignmentforum.org/feed.xml", siteUrl: "https://www.alignmentforum.org/", language: "en", digestRole: "analysis" },
-  { id: "eleutherai", categoryId: "ai", name: "EleutherAI", url: "https://blog.eleuther.ai/index.xml", siteUrl: "https://blog.eleuther.ai/", language: "en", digestRole: "research" },
+  { id: "ollama", categoryId: "ai", name: "Ollama Blog", url: "https://ollama.com/blog/rss.xml", siteUrl: "https://ollama.com/blog", language: "en", digestRole: "practitioner" },
   { id: "cursor-blog", categoryId: "ai", name: "Cursor", url: "https://cursor.com/atom.xml", siteUrl: "https://cursor.com", language: "en", digestRole: "practitioner" },
   { id: "arxiv-cs-ai", categoryId: "ai", name: "arXiv cs.AI", url: "https://rss.arxiv.org/rss/cs.AI", siteUrl: "https://arxiv.org/list/cs.AI/recent", language: "en", digestRole: "research" },
   { id: "huggingface-papers", categoryId: "ai", name: "Hugging Face Papers", url: "https://rsshub.ktachibana.party/huggingface/daily-papers", siteUrl: "https://huggingface.co/papers", language: "en", digestRole: "research", rsshubRoute: "/huggingface/daily-papers" },
   { id: "github-changelog", categoryId: "engineering", name: "GitHub Changelog", url: "https://github.blog/changelog/feed/", siteUrl: "https://github.blog/changelog/", language: "en" },
   { id: "cloudflare-blog", categoryId: "engineering", name: "Cloudflare Blog", url: "https://blog.cloudflare.com/rss/", siteUrl: "https://blog.cloudflare.com/", language: "en" },
+  { id: "ruanyifeng", categoryId: "engineering", name: "阮一峰的网络日志", url: "https://www.ruanyifeng.com/blog/atom.xml", siteUrl: "https://www.ruanyifeng.com/blog/", language: "zh", optional: true },
+  { id: "codingnow", categoryId: "engineering", name: "云风的 BLOG", url: "https://blog.codingnow.com/atom.xml", siteUrl: "https://blog.codingnow.com/", language: "zh", optional: true },
   { id: "sspai", categoryId: "chinese", name: "少数派", url: "https://sspai.com/feed", siteUrl: "https://sspai.com/", language: "zh" },
   { id: "yitianshijie", categoryId: "chinese", name: "一天世界", url: "https://blog.yitianshijie.net/feed/atom/", siteUrl: "https://blog.yitianshijie.net/", language: "zh" },
+  { id: "tw93-weekly", categoryId: "chinese", name: "潮流周刊", url: "https://weekly.tw93.fun/rss.xml", siteUrl: "https://weekly.tw93.fun/", language: "zh", optional: true },
+  { id: "appinn", categoryId: "chinese", name: "小众软件", url: "https://feed.appinn.com/", siteUrl: "https://www.appinn.com/", language: "zh", optional: true },
   { id: "nasa", categoryId: "science", name: "NASA", url: "https://www.nasa.gov/feed/", siteUrl: "https://www.nasa.gov/", language: "en" },
   { id: "quanta", categoryId: "science", name: "Quanta Magazine", url: "https://www.quantamagazine.org/feed/", siteUrl: "https://www.quantamagazine.org/", language: "en" },
   { id: "smashing", categoryId: "design", name: "Smashing Magazine", url: "https://www.smashingmagazine.com/feed/", siteUrl: "https://www.smashingmagazine.com/", language: "en" },
   { id: "a-list-apart", categoryId: "design", name: "A List Apart", url: "https://alistapart.com/main/feed/", siteUrl: "https://alistapart.com/", language: "en" },
+  { id: "zhangxinxu", categoryId: "design", name: "张鑫旭的博客", url: "https://www.zhangxinxu.com/wordpress/feed/", siteUrl: "https://www.zhangxinxu.com/wordpress/", language: "zh", optional: true },
   { id: "yc", categoryId: "business", name: "Y Combinator", url: "https://www.ycombinator.com/blog/rss", siteUrl: "https://www.ycombinator.com/blog", language: "en" },
   { id: "stripe", categoryId: "business", name: "Stripe Blog", url: "https://stripe.com/blog/feed.rss", siteUrl: "https://stripe.com/blog", language: "en" },
   { id: "krebs", categoryId: "security", name: "Krebs on Security", url: "https://krebsonsecurity.com/feed/", siteUrl: "https://krebsonsecurity.com/", language: "en" },
@@ -129,7 +136,7 @@ export const topicSourceList = (categoryId: string) => {
   return {
     title: `${category.name}信源`,
     actionLabel: "查看信源",
-    items: FEEDS.filter((feed) => feed.categoryId === category.id).map((feed) => ({
+    items: FEEDS.filter((feed) => feed.categoryId === category.id && !feed.optional).map((feed) => ({
       title: feed.name,
       description: feedSiteHost(feed.siteUrl),
     })),

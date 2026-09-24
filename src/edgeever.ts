@@ -96,6 +96,24 @@ export interface PluginContext {
   };
   ui: {
     showNotice(message: string): void;
+    panels: {
+      register(panel: {
+        id: string;
+        title: string;
+        purpose: "workflow";
+        presentation?: "dialog" | "fullscreen";
+        mount(container: HTMLElement, context: {
+          shell: {
+            set(chrome: {
+              header?: { title?: string; description?: string | null };
+              toolbar?: Array<{ type: "search"; key: string; placeholder?: string; value?: string } | { type: "tabs"; key: string; value?: string; options: Array<{ value: string; label: string }> }>;
+              onChange?: (key: string, value: string) => void;
+            }): void;
+          };
+        }): void | (() => void) | Promise<void | (() => void)>;
+      }): () => void;
+      open(panelId: string): Promise<void>;
+    };
   };
 }
 

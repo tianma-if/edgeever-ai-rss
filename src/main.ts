@@ -1,4 +1,4 @@
-import { CATEGORIES, DEFAULT_CATEGORY_IDS, FEEDS } from "./catalog";
+import { CATEGORIES, DEFAULT_CATEGORY_IDS } from "./catalog";
 import { articleFreshness, clusterRelatedArticles } from "./dedupe";
 import type { EdgeEverPlugin, PluginContext } from "./edgeever";
 import { buildDigestMarkdown, DAILY_DIGEST_TAG, digestArticlePayload, digestDateKey, digestTags, digestTitle, recentCategoryArticles } from "./digest";
@@ -6,6 +6,9 @@ import { fetchFeed } from "./feed";
 import type { Article } from "./feed";
 import { createLatestTaskQueue } from "./latest-task-queue";
 import { AUTO_DIGEST_KEY, DIGEST_GENERATION_TIME_KEY, digestCronExpression, loadReaderPreferences, migrateLegacyCategorySettings } from "./settings";
+import { loadSubscriptions, selectSources } from "./subscriptions";
+import { registerSubscriptionPanel } from "./subscription-panel";
+import { registerArticleSavePanel } from "./article-save";
 import {
   applyHeadlineTranslation,
   headlineTranslationIsCurrent,
@@ -55,8 +58,8 @@ const mapLimit = async <T, R>(items: T[], limit: number, task: (item: T) => Prom
   return results;
 };
 
-const mergeArticles = (state: ReaderState, articles: Article[]): ReaderState => {
-  const merged = new Map(state.articles.map((article) => [article.id, article]));
+const mergeArticles = (state: ReaderState, articles: Article[], sourceIds: Set<string>): ReaderState => {
+  const merged = new Map(state.articles.filter((article) => sourceIds.has(article.sourceId)).map((article) => [article.id, article]));
   for (const article of articles) merged.set(article.id, article);
   const clustered = clusterRelatedArticles([...merged.values()].filter((article) => state.selectedCategoryIds.includes(article.categoryId)));
   const representativeByArticleId = new Map<string, string>();
@@ -137,10 +140,10 @@ const runCategoryDigestJob = async (context: PluginContext): Promise<DigestJobRe
   const categories = CATEGORIES.filter((category) => preferences.selectedCategoryIds.includes(category.id));
   if (!categories.length) throw new Error("请至少选择一个主题。");
 
-  const sources = FEEDS.filter((feed) => state.selectedCategoryIds.includes(feed.categoryId));
+  const sources = selectSources(state.selectedCategoryIds, await loadSubscriptions(context));
   const fetched = await mapLimit(sources, 3, (source) => fetchFeed(context, source));
   const sourceFailures = fetched.filter((result) => result.status === "rejected").length;
-  state = mergeArticles(state, fetched.flatMap((result) => result.status === "fulfilled" ? result.value : []));
+  state = mergeArticles(state, fetched.flatMap((result) => result.status === "fulfilled" ? result.value : []), new Set(sources.map((source) => source.id)));
   state.refreshedAt = new Date().toISOString();
   if (preferences.autoTranslate) await translateHeadlines(context, state, preferences.translationTarget);
   await context.storage.set(STATE_KEY, state);
@@ -249,6 +252,8 @@ const plugin: EdgeEverPlugin = {
         }
       },
     });
+    const disposeSubscriptions = registerSubscriptionPanel(context);
+    const disposeArticleSave = registerArticleSavePanel(context);
     const scheduleSync = createLatestTaskQueue();
     const enqueueScheduleSync = () => scheduleSync.enqueue(() => syncDailyDigestScheduleWithRetry(context));
     const disposeSettingsChanged = context.events.on("settings.changed", async ({ key }) => {
@@ -270,6 +275,8 @@ const plugin: EdgeEverPlugin = {
     return () => {
       disposeSettingsChanged();
       disposeDigestCommand();
+      disposeSubscriptions();
+      disposeArticleSave();
     };
   },
 };

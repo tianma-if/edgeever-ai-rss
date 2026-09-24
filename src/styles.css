@@ -1,1 +1,14 @@
-/*! EdgeEver AI RSS does not register a custom panel. */
+.edgeever-rss-panel { max-width: 900px; margin: 0 auto; padding: 1rem; color: inherit; }
+.edgeever-rss-muted { margin: .75rem 0; color: #64748b; font-size: .875rem; line-height: 1.5; }
+.edgeever-rss-message { margin: .5rem 0 1rem; padding: .75rem 1rem; border-radius: .5rem; background: #ecfdf5; color: #065f46; font-size: .875rem; }
+.edgeever-rss-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 0; border-bottom: 1px solid #e2e8f0; }
+.edgeever-rss-row-details { min-width: 0; overflow-wrap: anywhere; }
+.edgeever-rss-row-title { font-weight: 600; }
+.edgeever-rss-row-subtitle { margin-top: .2rem; color: #64748b; font-size: .8rem; }
+.edgeever-rss-button { flex: none; padding: .45rem .75rem; border: 1px solid #94a3b8; border-radius: .4rem; background: transparent; color: inherit; cursor: pointer; font: inherit; font-size: .875rem; }
+.edgeever-rss-button:hover:not(:disabled) { background: #f1f5f9; }
+.edgeever-rss-button:disabled { opacity: .55; cursor: default; }
+.edgeever-rss-form { display: grid; grid-template-columns: minmax(12rem,2fr) minmax(8rem,1fr) minmax(8rem,1fr) minmax(6rem,.6fr) auto; gap: .5rem; margin: 1rem 0; }
+.edgeever-rss-input { min-width: 0; padding: .45rem .6rem; border: 1px solid #94a3b8; border-radius: .4rem; background: transparent; color: inherit; font: inherit; font-size: .875rem; }
+@media (max-width: 800px) { .edgeever-rss-form { grid-template-columns: 1fr 1fr; } .edgeever-rss-form .edgeever-rss-input:first-child { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .edgeever-rss-row { align-items: flex-start; } .edgeever-rss-form { grid-template-columns: 1fr; } .edgeever-rss-form .edgeever-rss-input:first-child { grid-column: auto; } }

@@ -123,8 +123,6 @@ interface DigestJobResult {
   updated: number;
   failed: number;
   failureDetails: string[];
-  skipped: number;
-  sourceFailures: number;
 }
 
 const failureMessage = (error: unknown): string => {
@@ -168,7 +166,6 @@ export const runCategoryDigestJob = async (context: PluginContext): Promise<Dige
 
   const sources = selectSources(state.selectedCategoryIds, await loadSubscriptions(context));
   const fetched = await mapLimit(sources, 3, (source) => fetchFeed(context, source));
-  const sourceFailures = fetched.filter((result) => result.status === "rejected").length;
   state = mergeArticles(state, fetched.flatMap((result) => result.status === "fulfilled" ? result.value : []), new Set(sources.map((source) => source.id)));
   state.refreshedAt = new Date().toISOString();
   await context.storage.set(STATE_KEY, state);
@@ -231,7 +228,7 @@ export const runCategoryDigestJob = async (context: PluginContext): Promise<Dige
     await context.storage.set(STATE_KEY, state);
   }
 
-  return { created, updated, failed, failureDetails, skipped: categories.length - pending.length, sourceFailures };
+  return { created, updated, failed, failureDetails };
 };
 
 const syncDailyDigestSchedule = async (context: PluginContext): Promise<void> => {
@@ -272,18 +269,9 @@ const plugin: EdgeEverPlugin = {
       id: DAILY_DIGEST_COMMAND_ID,
       title: "生成今日 RSS 分类日报",
       run: async () => {
-        try {
-          const result = await runCategoryDigestJob(context);
-          if (result.failed > 0 && result.created + result.updated === 0) {
-            throw new Error(`${result.failed} 个分类日报全部生成失败。${result.failureDetails.join("；")}`);
-          }
-          const failureText = result.failed ? `，${result.failed} 个失败：${result.failureDetails.join("；")}` : "";
-          const skippedText = result.skipped ? `，跳过 ${result.skipped} 个空分类` : "";
-          const sourceFailureText = result.sourceFailures ? `，${result.sourceFailures} 个订阅源读取失败` : "";
-          context.ui.showNotice(`分类日报完成：新建 ${result.created} 篇，更新 ${result.updated} 篇${skippedText}${failureText}${sourceFailureText}。`);
-        } catch (error) {
-          context.ui.showNotice(error instanceof Error ? error.message : "分类日报生成失败。");
-          throw error;
+        const result = await runCategoryDigestJob(context);
+        if (result.failed > 0 && result.created + result.updated === 0) {
+          throw new Error(`${result.failed} 个分类日报全部生成失败。${result.failureDetails.join("；")}`);
         }
       },
     });

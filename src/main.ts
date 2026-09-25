@@ -8,7 +8,6 @@ import { createLatestTaskQueue } from "./latest-task-queue";
 import { AUTO_DIGEST_KEY, DIGEST_GENERATION_TIME_KEY, digestCronExpression, loadReaderPreferences, migrateLegacyCategorySettings } from "./settings";
 import { loadSubscriptions, selectSources } from "./subscriptions";
 import { registerSubscriptionPanel } from "./subscription-panel";
-import { registerArticleSavePanel } from "./article-save";
 import {
   applyHeadlineTranslation,
   headlineTranslationIsCurrent,
@@ -276,7 +275,6 @@ const plugin: EdgeEverPlugin = {
       },
     });
     const disposeSubscriptions = registerSubscriptionPanel(context);
-    const disposeArticleSave = registerArticleSavePanel(context);
     const scheduleSync = createLatestTaskQueue();
     const enqueueScheduleSync = () => scheduleSync.enqueue(() => syncDailyDigestScheduleWithRetry(context));
     const disposeSettingsChanged = context.events.on("settings.changed", async ({ key }) => {
@@ -299,7 +297,6 @@ const plugin: EdgeEverPlugin = {
       disposeSettingsChanged();
       disposeDigestCommand();
       disposeSubscriptions();
-      disposeArticleSave();
     };
   },
 };

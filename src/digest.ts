@@ -85,10 +85,15 @@ const markdownEscape = (value: string): string => value.replace(/([\\`*_{}\[\]()
 
 const markdownUrl = (value: string): string => value.replace(/</g, "%3C").replace(/>/g, "%3E");
 
+// Keep link labels from ending in a file extension (for example arXiv cs.AI),
+// which EdgeEver otherwise displays as a downloadable attachment.
+const sourceLink = (name: string, url: string): string =>
+  `[${markdownEscape(`${name} · 原文`)}](<${markdownUrl(url)}>)`;
+
 const sourceLinks = (article: Article): string => [
-  `[${markdownEscape(article.sourceName)}](<${markdownUrl(article.url)}>)`,
+  sourceLink(article.sourceName, article.url),
   ...(article.relatedCoverage ?? []).map((coverage) =>
-    `[佐证 · ${markdownEscape(coverage.sourceName)}](<${markdownUrl(coverage.url)}>)`,
+    sourceLink(`佐证 · ${coverage.sourceName}`, coverage.url),
   ),
 ].join(" · ");
 

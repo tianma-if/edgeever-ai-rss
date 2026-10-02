@@ -98,7 +98,7 @@ describe("category digest", () => {
     expect(markdown).not.toContain("## 来源");
     expect(markdown).not.toContain("今日速览");
     expect(markdown).toContain("最近 48 小时");
-    expect(markdown).toContain("[OpenAI News](<https://example.com/update>)");
+    expect(markdown).toContain("[OpenAI News · 原文](<https://example.com/update>)");
 
     // Also verify any residual 速览 block from older/cached responses is stripped cleanly
     const cleaned = renderDigestBody("> 💡 **今日速览**：行业重要更新。\n\n---\n\n## 01 | 重要更新", [article()]);
@@ -119,11 +119,20 @@ describe("category digest", () => {
         publishedAt: null,
       }],
     })]);
-    expect(markdown).toContain("[Source \\[one\\]](<https://example.com/a%3Eb>)");
-    expect(markdown).toContain("[佐证 · Related](<https://related.example.com/story>)");
-    expect(markdown).toContain(" · [Source \\[one\\]]");
-    expect(markdown).toContain("标点。 [Source \\[one\\]]");
+    expect(markdown).toContain("[Source \\[one\\] · 原文](<https://example.com/a%3Eb>)");
+    expect(markdown).toContain("[佐证 · Related · 原文](<https://related.example.com/story>)");
+    expect(markdown).toContain(" · [Source \\[one\\] · 原文]");
+    expect(markdown).toContain("标点。 [Source \\[one\\] · 原文]");
     expect(markdown).toContain("无效〔2〕");
+  });
+
+  test("keeps extension-like source names as web link labels", () => {
+    const markdown = renderDigestBody("> 🔗 **信源**：〔1〕", [article({
+      sourceName: "arXiv cs.AI",
+      url: "https://arxiv.org/abs/2609.00001",
+    })]);
+    expect(markdown).toContain("[arXiv cs\\.AI · 原文](<https://arxiv.org/abs/2609.00001>)");
+    expect(markdown).not.toContain("[arXiv cs\\.AI](");
   });
 
   test("includes translated summaries in the AI payload", () => {

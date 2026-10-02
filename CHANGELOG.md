@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.3 — 2026-10-02
+
+- 移除分类日报生成结果弹窗，避免成功或部分订阅源读取失败时打断阅读。
+- 精简插件命令，仅保留生成日报和管理订阅；移除逐篇保存 RSS 文章的功能。
+- Remove digest result dialogs so successful runs and partial feed failures do not interrupt reading.
+- Keep only the Generate Digest and Manage Subscriptions commands, removing the separate RSS article saving feature.
+
 ## 0.5.8 — 2026-09-18
 
 - 移除日报中的「今日速览」空话段落，元信息卡片下方直接呈现具体热点，减少首屏视觉冗余并提升信息获取效率。
